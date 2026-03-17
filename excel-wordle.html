@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SalesTracker_Q4.xlsx - Excel</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Segoe UI', Calibri, Tahoma, sans-serif;
+  font-size: 12px;
+  background: #f0f0f0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+  color: #1a1a1a;
+}
+
+/* ── TITLE BAR ── */
+.title-bar {
+  background: #1F7145;
+  color: white;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 8px;
+  flex-shrink: 0;
+}
+.tb-left { display:flex; align-items:center; gap:6px; }
+.xl-icon {
+  width:20px; height:20px; background:white; border-radius:2px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:900; color:#1F7145; flex-shrink:0;
+  font-family:'Times New Roman',serif;
+}
+.tb-qs { display:flex; gap:1px; margin-left:4px; }
+.tb-q {
+  width:24px; height:22px; display:flex; align-items:center;
+  justify-content:center; font-size:11px; opacity:0.8;
+  border-radius:2px; cursor:pointer;
+}
+.tb-q:hover { background:rgba(255,255,255,0.2); opacity:1; }
+.tb-title {
+  flex:1; text-align:center; font-size:12px; font-weight:400; opacity:0.95;
+}
+.tb-title span { opacity:0.7; }
+.tb-controls { display:flex; }
+.tb-btn {
+  width:46px; height:30px; display:flex; align-items:center;
+  justify-content:center; cursor:pointer; font-size:10px; color:rgba(255,255,255,0.9);
+}
+.tb-btn:hover { background:rgba(255,255,255,0.15); }
+.tb-btn.close:hover { background:#e81123; }
+
+/* ── RIBBON TABS ── */
+.ribbon-tabs {
+  background: #1F7145;
+  display:flex; align-items:flex-end;
+  padding:0 8px; height:28px; flex-shrink:0;
+}
+.rtab {
+  padding:4px 14px 5px; font-size:12px;
+  color:rgba(255,255,255,0.82); cursor:pointer;
+  border-radius:3px 3px 0 0;
+}
+.rtab:hover { background:rgba(255,255,255,0.12); color:white; }
+.rtab.active { background:#f0f0f0; color:#1a1a1a; font-weight:600; }
+
+/* ── RIBBON ── */
+.ribbon {
+  background:#f0f0f0;
+  border-bottom:1px solid #bbb;
+  display:flex; align-items:stretch;
+  padding:2px 4px 0 8px;
+  height:66px; flex-shrink:0; overflow:hidden;
+}
+.rg {
+  display:flex; flex-direction:column;
+  padding:0 6px 0px; border-right:1px solid #d1d1d1;
+  align-items:center; min-width:0;
+}
+.rg:last-child { border-right:none; }
+.rg-body { display:flex; flex:1; align-items:center; gap:2px; padding:3px 0 2px; }
+.rg-label { font-size:9px; color:#666; padding-bottom:3px; white-space:nowrap; }
+.rb {
+  display:flex; flex-direction:column; align-items:center;
+  gap:1px; padding:2px 5px; border-radius:3px;
+  cursor:pointer; border:1px solid transparent;
+  font-size:9px; color:#222; min-width:28px;
+  height:50px; justify-content:center;
+}
+.rb:hover { background:#dce6f7; border-color:#b8ccef; }
+.rb svg { width:18px; height:18px; }
+.smb {
+  height:20px; padding:0 6px; font-size:11px; font-family:inherit;
+  border:1px solid #c8c8c8; background:white; border-radius:2px;
+  cursor:pointer; color:#333; display:flex; align-items:center; gap:3px;
+  white-space:nowrap;
+}
+.smb:hover { background:#dce6f7; border-color:#b8ccef; }
+.rsel {
+  height:20px; font-size:11px; font-family:inherit;
+  border:1px solid #c0c0c0; background:white;
+  border-radius:2px; color:#222; padding:0 4px;
+}
+
+/* ── FORMULA BAR ── */
+.formula-bar {
+  height:26px; background:white; border-bottom:1px solid #c0c0c0;
+  display:flex; align-items:center; flex-shrink:0;
+}
+.name-box {
+  width:80px; height:100%; border-right:2px solid #bbb;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:600; color:#1a1a1a; flex-shrink:0;
+  padding:0 8px;
+}
+.fx-label {
+  width:28px; height:100%; display:flex; align-items:center;
+  justify-content:center; font-size:12px; font-style:italic;
+  color:#666; border-right:1px solid #ddd; flex-shrink:0;
+}
+.formula-val {
+  flex:1; padding:0 8px; font-size:12px; color:#1a1a1a;
+  line-height:26px; overflow:hidden; white-space:nowrap;
+}
+
+/* ── SPREADSHEET AREA ── */
+.sheet-wrap {
+  flex:1; overflow:auto; background:#fff; display:flex; flex-direction:column;
+}
+.sheet-wrap::-webkit-scrollbar { width:14px; height:14px; }
+.sheet-wrap::-webkit-scrollbar-track { background:#f0f0f0; }
+.sheet-wrap::-webkit-scrollbar-thumb { background:#c0c0c0; border:2px solid #f0f0f0; }
+
+/* Grid table */
+.grid-outer { display:flex; flex:1; }
+.row-headers { flex-shrink:0; }
+
+table.sheet {
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+
+/* Column header row */
+.col-header {
+  background:#f2f2f2;
+  height:22px; min-width:0;
+  border:1px solid #d0d0d0;
+  text-align:center; vertical-align:middle;
+  font-size:11px; font-weight:400; color:#666;
+  position:sticky; top:0; z-index:5;
+}
+.col-header.row-num-head {
+  width:40px; min-width:40px; background:#f2f2f2;
+  position:sticky; left:0; z-index:10;
+}
+.col-header.active-col { background:#e2f0d9; color:#1F7145; font-weight:600; }
+
+/* Cells */
+td.cell {
+  border:1px solid #d0d0d0;
+  height:22px; padding:0 3px;
+  font-size:12px; vertical-align:middle;
+  overflow:hidden; white-space:nowrap;
+  background:white; color:#1a1a1a;
+}
+td.cell.row-num {
+  background:#f2f2f2; color:#666; font-size:11px; font-weight:400;
+  text-align:center; padding:0; position:sticky; left:0; z-index:4;
+  width:40px; min-width:40px;
+}
+td.cell.row-num.active-row { background:#e2f0d9; color:#1F7145; font-weight:600; }
+
+/* Title merged cell */
+.title-cell {
+  background:#1F5C8B; color:white; font-weight:700; font-size:13px;
+  padding:0 8px; height:28px;
+}
+/* Header row */
+.header-cell {
+  background:#E2EFDA; color:#375623; font-weight:700; font-size:11px;
+  text-align:center; padding:0 3px; border:1px solid #c0c0c0;
+}
+/* Fake data cells */
+.fake { color:#404040; }
+.fake-green { background:#E2EFDA !important; color:#375623; font-weight:600; }
+.fake-num { text-align:right; color:#404040; }
+.fake-label { color:#595959; font-weight:600; }
+.fake-grey { background:#F2F2F2 !important; color:#808080; }
+.fake-bold { font-weight:700; }
+.fake-blue { color:#1F5C8B; }
+
+/* ── WORDLE CELLS ── */
+.w-cell {
+  width:42px !important; min-width:42px !important;
+  height:26px !important;
+  text-align:center !important;
+  font-size:14px !important;
+  font-weight:700 !important;
+  letter-spacing:0.05em;
+  padding:0 !important;
+  cursor:default;
+  transition: background 0.12s;
+}
+.w-cell.active-guess {
+  outline:2px solid #1F7145;
+  outline-offset:-2px;
+  z-index:3; position:relative;
+}
+.w-cell.current-letter {
+  outline:2px solid #1F7145;
+  outline-offset:-2px;
+  z-index:4; position:relative;
+}
+/* Result states — Excel conditional formatting colours */
+.w-cell.correct  { background:#70AD47 !important; color:white !important; }
+.w-cell.present  { background:#FFD966 !important; color:#1a1a1a !important; }
+.w-cell.absent   { background:#D9D9D9 !important; color:#595959 !important; }
+.w-cell.locked   { cursor:default; }
+
+/* ── SHEET TABS ── */
+.sheet-tabs {
+  background:#f0f0f0; border-top:1px solid #c0c0c0;
+  height:24px; display:flex; align-items:flex-end;
+  padding:0 4px; flex-shrink:0;
+}
+.tab {
+  padding:2px 14px 3px; font-size:11px; cursor:pointer;
+  border:1px solid #c0c0c0; border-bottom:none; border-radius:3px 3px 0 0;
+  background:#e0e0e0; color:#666; margin-right:2px;
+}
+.tab.active { background:white; color:#1a1a1a; font-weight:600; border-bottom:1px solid white; }
+.tab:hover:not(.active) { background:#eee; }
+.tab-add { padding:2px 8px; font-size:14px; color:#888; cursor:pointer; }
+.tab-add:hover { color:#1F7145; }
+
+/* ── STATUS BAR ── */
+.status-bar {
+  background:#217346; color:rgba(255,255,255,0.88);
+  height:22px; display:flex; align-items:center;
+  padding:0 12px; font-size:11px; gap:0; flex-shrink:0;
+}
+.st { padding:0 10px; cursor:default; height:100%; display:flex; align-items:center; border-right:1px solid rgba(255,255,255,0.15); }
+.st:last-child { border-right:none; }
+.st:hover { background:rgba(255,255,255,0.12); }
+.st-right { margin-left:auto; display:flex; }
+.zoom-wrap { display:flex; align-items:center; gap:5px; padding:0 10px; }
+input[type=range].zoom {
+  -webkit-appearance:none; width:80px; height:3px;
+  background:rgba(255,255,255,0.4); outline:none; border-radius:2px;
+}
+input[type=range].zoom::-webkit-slider-thumb {
+  -webkit-appearance:none; width:12px; height:12px;
+  background:white; border-radius:50%; cursor:pointer;
+}
+
+/* ── MODAL ── */
+.modal-bg {
+  position:fixed; inset:0; background:rgba(0,0,0,0.4);
+  display:none; align-items:center; justify-content:center; z-index:100;
+}
+.modal-bg.show { display:flex; }
+.modal {
+  background:white; min-width:340px; border-radius:2px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.35);
+  overflow:hidden; font-family:'Segoe UI',sans-serif;
+}
+.modal-head {
+  background:#1F5C8B; color:white;
+  padding:10px 16px; display:flex; align-items:center; justify-content:space-between;
+}
+.modal-head-title { font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; }
+.modal-x { cursor:pointer; opacity:0.8; font-size:14px; }
+.modal-x:hover { opacity:1; }
+.modal-body { padding:20px 20px 16px; }
+.modal-msg { font-size:13px; color:#1a1a1a; margin-bottom:6px; }
+.modal-sub { font-size:11px; color:#888; margin-bottom:18px; }
+.modal-word { font-size:22px; font-weight:700; color:#1F7145; letter-spacing:0.1em; margin-bottom:4px; }
+.modal-btns { display:flex; justify-content:flex-end; gap:8px; }
+.btn-xl {
+  background:#1F7145; color:white; border:none;
+  padding:6px 20px; border-radius:2px; font-size:12px;
+  font-family:'Segoe UI',sans-serif; cursor:pointer;
+}
+.btn-xl:hover { background:#175C38; }
+.btn-xl-sec {
+  background:white; color:#333; border:1px solid #c0c0c0;
+  padding:6px 20px; border-radius:2px; font-size:12px;
+  font-family:'Segoe UI',sans-serif; cursor:pointer;
+}
+.btn-xl-sec:hover { background:#f0f0f0; }
+
+/* ── TOAST ── */
+/* ── WELCOME MODAL ── */
+.welcome-modal {
+  background:white; width:460px; border-radius:2px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.35);
+  overflow:hidden; font-family:'Segoe UI',sans-serif;
+}
+.wm-head {
+  background:#1F7145; color:white;
+  padding:12px 16px; display:flex; align-items:center; gap:10px;
+}
+.wm-head-title { font-size:14px; font-weight:600; }
+.wm-body { padding:20px 20px 16px; }
+.wm-intro { font-size:12px; color:#444; margin-bottom:14px; line-height:1.6; }
+.wm-rules { border:1px solid #e0e0e0; border-radius:2px; overflow:hidden; margin-bottom:16px; }
+.wm-rule {
+  display:flex; align-items:center; gap:12px; padding:7px 12px;
+  border-bottom:1px solid #f0f0f0; font-size:12px; color:#333;
+}
+.wm-rule:last-child { border-bottom:none; }
+.wm-swatch {
+  width:28px; height:22px; border-radius:2px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:13px;
+}
+.wm-swatch.correct { background:#70AD47; color:white; }
+.wm-swatch.present { background:#FFD966; color:#1a1a1a; }
+.wm-swatch.absent  { background:#D9D9D9; color:#595959; }
+.wm-keys {
+  font-size:11px; color:#888; margin-bottom:16px;
+  display:flex; gap:16px; align-items:center;
+}
+.wm-key {
+  background:#f2f2f2; border:1px solid #c8c8c8; border-radius:2px;
+  padding:2px 8px; font-size:11px; font-weight:600; color:#333;
+}
+.wm-btns { display:flex; justify-content:flex-end; }
+
+.toast {
+  position:fixed; bottom:50px; left:50%; transform:translateX(-50%);
+  background:#1a1a1a; color:white; padding:6px 16px;
+  border-radius:2px; font-size:12px; font-family:'Segoe UI',sans-serif;
+  opacity:0; transition:opacity 0.2s; pointer-events:none; z-index:200;
+  white-space:nowrap;
+}
+.toast.show { opacity:1; }
+
+#hiddenInp {
+  position:absolute; opacity:0; pointer-events:none; top:0; left:0; width:1px; height:1px;
+}
+</style>
+</head>
+<body>
+
+<!-- TITLE BAR -->
+<div class="title-bar">
+  <div class="tb-left">
+    <div class="xl-icon">X</div>
+    <div class="tb-qs">
+      <div class="tb-q">💾</div>
+      <div class="tb-q">↩</div>
+      <div class="tb-q">↪</div>
+    </div>
+  </div>
+  <div class="tb-title">SalesTracker_Q4.xlsx — <span>Excel</span></div>
+  <div class="tb-controls">
+    <div class="tb-btn">?</div>
+    <div class="tb-btn">─</div>
+    <div class="tb-btn">⬜</div>
+    <div class="tb-btn close">✕</div>
+  </div>
+</div>
+
+<!-- RIBBON TABS -->
+<div class="ribbon-tabs">
+  <div class="rtab">File</div>
+  <div class="rtab active">Home</div>
+  <div class="rtab">Insert</div>
+  <div class="rtab">Page Layout</div>
+  <div class="rtab">Formulas</div>
+  <div class="rtab">Data</div>
+  <div class="rtab">Review</div>
+  <div class="rtab">View</div>
+</div>
+
+<!-- RIBBON -->
+<div class="ribbon">
+  <div class="rg">
+    <div class="rg-body">
+      <div class="rb" style="height:50px">
+        <svg viewBox="0 0 18 18" fill="none" stroke="#444" stroke-width="1.3"><rect x="3" y="2" width="9" height="12" rx="1"/><rect x="5" y="5" width="6" height="9" rx="1" fill="white" stroke="#444"/><line x1="7" y1="7" x2="10" y2="7"/><line x1="7" y1="9.5" x2="10" y2="9.5"/><line x1="7" y1="12" x2="9" y2="12"/></svg>
+        Paste
+      </div>
+    </div>
+    <div class="rg-label">Clipboard</div>
+  </div>
+  <div class="rg">
+    <div class="rg-body" style="flex-direction:column;gap:3px">
+      <div style="display:flex;gap:3px">
+        <select class="rsel" style="width:110px"><option>Calibri</option><option>Arial</option><option>Segoe UI</option></select>
+        <select class="rsel" style="width:36px;text-align:center"><option>11</option><option>12</option><option>14</option></select>
+      </div>
+      <div style="display:flex;gap:2px">
+        <div class="smb" style="font-weight:bold;font-size:12px;min-width:22px;justify-content:center">B</div>
+        <div class="smb" style="font-style:italic;font-size:12px;min-width:22px;justify-content:center">I</div>
+        <div class="smb" style="text-decoration:underline;font-size:12px;min-width:22px;justify-content:center">U</div>
+        <div class="smb" style="background:#FFFF00;min-width:22px;justify-content:center;font-size:10px">A</div>
+        <div class="smb" style="color:#c00;min-width:22px;justify-content:center;font-weight:bold;font-size:10px">A</div>
+      </div>
+    </div>
+    <div class="rg-label">Font</div>
+  </div>
+  <div class="rg">
+    <div class="rg-body" style="flex-direction:column;gap:3px">
+      <div style="display:flex;gap:2px">
+        <div class="smb">≡</div><div class="smb">≡</div><div class="smb" style="font-weight:bold">≡</div>
+        <div class="smb">↩</div><div class="smb">⊞</div>
+      </div>
+      <div style="display:flex;gap:2px">
+        <div class="smb">$</div><div class="smb">%</div><div class="smb">‰</div>
+        <div class="smb">.0↗</div><div class="smb">.0↘</div>
+      </div>
+    </div>
+    <div class="rg-label">Alignment / Number</div>
+  </div>
+  <div class="rg">
+    <div class="rg-body" style="flex-direction:column;gap:3px">
+      <div class="smb" style="width:130px">🎨 Conditional Formatting ▾</div>
+      <div class="smb" style="width:130px">📋 Format as Table ▾</div>
+      <div class="smb" style="width:130px">📐 Cell Styles ▾</div>
+    </div>
+    <div class="rg-label">Styles</div>
+  </div>
+  <div class="rg">
+    <div class="rg-body" style="flex-direction:column;gap:3px">
+      <div class="smb">➕ Insert ▾</div>
+      <div class="smb">➖ Delete ▾</div>
+      <div class="smb">🔧 Format ▾</div>
+    </div>
+    <div class="rg-label">Cells</div>
+  </div>
+  <div class="rg">
+    <div class="rg-body" style="flex-direction:column;gap:3px">
+      <div class="smb">Σ AutoSum ▾</div>
+      <div class="smb">↓ Fill ▾</div>
+      <div class="smb">🔍 Find &amp; Select ▾</div>
+    </div>
+    <div class="rg-label">Editing</div>
+  </div>
+</div>
+
+<!-- FORMULA BAR -->
+<div class="formula-bar">
+  <div class="name-box" id="nameBox">B5</div>
+  <div class="fx-label">fx</div>
+  <div class="formula-val" id="formulaVal"></div>
+</div>
+
+<!-- SPREADSHEET -->
+<div class="sheet-wrap" id="sheetWrap">
+<table class="sheet" id="mainSheet">
+  <thead>
+    <tr id="colHeaderRow">
+      <!-- filled by JS -->
+    </tr>
+  </thead>
+  <tbody id="sheetBody">
+    <!-- filled by JS -->
+  </tbody>
+</table>
+</div>
+
+<!-- SHEET TABS -->
+<div class="sheet-tabs">
+  <div class="tab active">Sheet1</div>
+  <div class="tab">Sheet2</div>
+  <div class="tab">Sheet3</div>
+  <div class="tab-add">＋</div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="st" id="stMode">Ready</div>
+  <div class="st-right">
+    <div class="st" id="stMsg"></div>
+    <div class="st">Normal</div>
+    <div class="st">📄</div>
+    <div class="st">🖧</div>
+    <div class="zoom-wrap">
+      <span style="font-size:10px">─</span>
+      <input type="range" class="zoom" value="100" min="50" max="200">
+      <span style="font-size:10px">+</span>
+      <span>100%</span>
+    </div>
+  </div>
+</div>
+
+<!-- WELCOME MODAL -->
+<div class="modal-bg show" id="welcomeBg">
+  <div class="welcome-modal">
+    <div class="wm-head">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="1.8">
+        <rect x="2" y="2" width="14" height="14" rx="2"/>
+        <line x1="6" y1="9" x2="12" y2="9"/>
+        <line x1="9" y1="6" x2="9" y2="12"/>
+      </svg>
+      <div class="wm-head-title">SalesTracker_Q4.xlsx — How to use this sheet</div>
+    </div>
+    <div class="wm-body">
+      <div class="wm-intro">
+        Each row in the <strong>Product Code Validation</strong> section contains a 5-letter code entry. Type your guess using the keyboard and press <span class="wm-key">Enter</span> to validate. Use <span class="wm-key">⌫</span> to correct entries. The conditional formatting will highlight matches automatically.
+      </div>
+      <div class="wm-rules">
+        <div class="wm-rule">
+          <div class="wm-swatch correct">W</div>
+          <div><strong>Green fill</strong> — correct letter, correct position. Matches the target code.</div>
+        </div>
+        <div class="wm-rule">
+          <div class="wm-swatch present">W</div>
+          <div><strong>Yellow fill</strong> — correct letter, wrong position. Present in the code elsewhere.</div>
+        </div>
+        <div class="wm-rule">
+          <div class="wm-swatch absent">W</div>
+          <div><strong>Grey fill</strong> — letter does not appear in the target code at all.</div>
+        </div>
+      </div>
+      <div class="wm-keys">
+        <span><span class="wm-key">A–Z</span> Type letters</span>
+        <span><span class="wm-key">Enter</span> Submit row</span>
+        <span><span class="wm-key">⌫ Backspace</span> Delete</span>
+      </div>
+      <div class="wm-btns">
+        <button class="btn-xl" onclick="document.getElementById('welcomeBg').classList.remove('show');focusInp()">Open Spreadsheet</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-title" id="modalTitle">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.8"><path d="M8 2 L8 9" stroke-linecap="round"/><circle cx="8" cy="12" r="1" fill="white" stroke="none"/></svg>
+        Microsoft Excel
+      </div>
+      <div class="modal-x" onclick="document.getElementById('modalBg').classList.remove('show')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-msg" id="modalMsg"></div>
+      <div class="modal-word" id="modalWord"></div>
+      <div class="modal-sub" id="modalSub"></div>
+      <div class="modal-btns">
+        <button class="btn-xl-sec" onclick="document.getElementById('modalBg').classList.remove('show')">Close</button>
+        <button class="btn-xl" onclick="newGame()">New Game</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input id="hiddenInp" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+<script>
+// ── WORD LIST ──
+const WORDS = [
+  "abbey","abide","abode","abort","about","above","abuse","abyss","acute","adept",
+  "admit","adopt","adore","adult","after","again","agile","aglow","agony","agree",
+  "ahead","aisle","alarm","album","alert","algae","alibi","align","alley","allot",
+  "allow","alloy","aloft","alone","along","aloof","altar","alter","amber","amble",
+  "amend","ample","angel","anger","angle","angry","anime","ankle","annex","antic",
+  "anvil","aorta","apart","aptly","arena","argue","arid","arise","arson","ascot",
+  "aside","asset","atlas","atone","attic","audit","augur","avail","avert","avid",
+  "avoid","award","aware","awful","awoke","azure","badge","badly","bagel","baker",
+  "bandy","basic","basis","batch","bayou","beach","beard","beast","belle","below",
+  "bench","bevel","bezel","birch","birth","bison","bitch","black","blade","blame",
+  "bland","blast","blaze","bleak","bleed","blend","bless","blind","bliss","block",
+  "blood","blown","blues","blunt","blurb","board","bogus","bonus","boost","booth",
+  "borax","bound","braid","brain","brand","brave","bread","break","breed","breve",
+  "briar","brick","bride","brief","bring","brisk","broad","broke","brook","broom",
+  "broth","brown","brunt","brush","budge","buggy","bulge","built","bumpy","bunny",
+  "buoy","burly","burst","buyer","bylaw","cabal","cable","camel","candy","canon",
+  "carry","carve","caste","catch","cause","cease","chain","chair","chalk","chaos",
+  "charm","chart","chase","cheap","check","cheek","chess","chest","chief","chill",
+  "china","chimp","chord","civic","civil","claim","clamp","clang","clank","clash",
+  "clasp","class","cleat","cleft","clerk","click","cliff","climb","cling","clip",
+  "cloak","clone","close","cloth","cloud","clout","coach","coast","cobalt","cobble",
+  "comet","comma","conch","could","count","court","covet","cozen","craft","cramp",
+  "crank","crash","creak","cream","creek","crest","crime","crimp","crisp","cross",
+  "crowd","crown","crush","crust","crux","cycle","cynic","daily","dance","datum",
+  "daunt","decoy","defer","delta","depot","depth","derby","digit","dirty","dodge",
+  "dogma","doubt","dough","draft","drain","drama","drape","dread","dream","dress",
+  "dried","drift","drill","drink","drive","drove","drown","druid","dying","eager",
+  "eagle","early","earthy","ebony","edict","eerie","eight","elect","elite","ember",
+  "empty","enemy","enjoy","envoy","epoxy","equal","error","essay","evade","event",
+  "every","exact","exalt","exile","exist","extra","faint","faith","false","fancy",
+  "fatal","fault","feast","feign","fetch","fiend","fifth","fifty","finch","final",
+  "first","fjord","fixed","flack","flame","flank","flare","flash","flask","flesh",
+  "flint","float","flock","flood","floor","flour","flout","fluid","flush","focus",
+  "force","forge","foyer","frame","frank","fraud","fresh","frond","front","frost",
+  "froze","frugal","funny","futon","gamma","gauze","gavel","gaudy","giant","girth",
+  "given","gland","glare","glass","glean","gleam","glide","gloom","glove","grace",
+  "grade","grain","grand","grant","grasp","grass","grave","great","greed","green",
+  "grief","grime","gripe","groan","groom","grope","gross","group","grove","gruel",
+  "gruff","grump","guard","guile","guilt","guise","gulch","gusto","habit","handy",
+  "happy","harsh","haven","heart","heavy","hedge","heist","hence","herbs","hinge",
+  "hippo","hoist","horse","hotel","hound","house","human","humor","humph","hurry",
+  "icily","ideal","idiom","image","imply","inbox","index","indie","infer","inter",
+  "intro","ionic","irony","ivory","jaunt","joust","judge","juice","juicy","jumbo",
+  "jumpy","knave","kneel","knife","knock","known","kudos","label","lance","large",
+  "latch","later","laugh","layer","leapt","learn","lease","leave","ledge","legal",
+  "lemon","level","light","lithe","liver","local","lodge","logic","lorry","lover",
+  "lower","loyal","lucid","lucky","lunch","lusty","lying","magic","major","maker",
+  "manor","maple","march","mason","match","mayor","media","mercy","merit","metal",
+  "might","modal","model","money","month","moral","mourn","motor","mount","mouse",
+  "mouth","movie","muddy","music","naive","naval","nerve","never","night","noble",
+  "noise","north","notch","noted","novel","nurse","nymph","oauth","ocean","offer",
+  "often","olive","onset","orbit","order","other","outer","outdo","oxide","ozone",
+  "paint","panel","panic","paper","party","pasta","patch","pause","peace","peach",
+  "pearl","peril","phase","phone","photo","piano","pitch","pixel","place","plain",
+  "plane","plant","plank","plate","plaza","plead","pluck","plumb","plume","plunk",
+  "plush","point","poise","polar","pouch","pound","power","press","price","pride",
+  "prime","print","probe","prism","privy","prize","prone","proof","prose","proud",
+  "prove","prowl","prune","psalm","pulse","punch","pupil","purse","query","queen",
+  "quest","queue","quick","quiet","quirk","quota","quote","radar","radio","raise",
+  "rally","range","rapid","raven","reach","react","ready","realm","rebel","refer",
+  "reign","relax","relay","renew","repay","reply","rider","ridge","rifle","right",
+  "rigid","risky","rival","river","rivet","robot","rocky","rouge","rough","round",
+  "route","royal","rugby","ruler","rural","sable","saint","salad","sauce","scale",
+  "scamp","scant","scare","scarf","scene","scone","scope","score","scout","scowl",
+  "scrub","seize","sense","serve","setup","seven","shade","shake","shall","shame",
+  "shank","shape","share","shark","sharp","shawl","shelf","shell","shift","shine",
+  "shirt","shock","shoot","shore","short","shout","shred","shrug","sight","silly",
+  "since","sixth","sixty","skill","skull","skunk","slave","sleek","sleep","slice",
+  "slick","slime","slide","slope","sloth","smart","smell","smile","smirk","smoke",
+  "snare","sneak","snide","sniff","snout","solid","solve","sooth","sorry","sound",
+  "south","space","spark","spawn","speak","speck","speed","spend","spice","spike",
+  "spine","split","spoke","spook","spoon","sport","spray","sprig","squad","squat",
+  "squid","stack","stage","stain","stake","stand","stare","start","state","stave",
+  "steam","steel","steep","steer","stern","stick","still","stock","stoic","stone",
+  "stood","store","storm","story","stove","stray","strip","strut","stuck","study",
+  "stuff","stump","stung","stunk","stunt","style","suave","sugar","suite","sulky",
+  "sunny","super","surge","swamp","swear","sweep","sweet","swept","sword","sworn",
+  "syrup","table","taken","taste","taunt","teach","teeth","tempo","tense","tenth",
+  "tepid","terms","thank","their","theme","there","these","thick","thing","think",
+  "third","those","three","threw","throw","thumb","tiger","tight","timer","tired",
+  "titan","title","today","token","tonic","total","touch","tough","towel","tower",
+  "toxic","trace","track","trade","trail","train","trait","trash","treat","trend",
+  "trial","tribe","trick","tried","tripe","troop","troth","truck","truly","trump",
+  "trust","truth","tumor","tuned","tweed","twice","twist","typed","ultra","unify",
+  "union","unite","unity","until","upper","upset","usage","usual","utter","vague",
+  "valid","value","valve","vapid","vault","video","vigor","viral","virus","visit",
+  "vista","vital","vivid","vocal","voice","vomit","voter","vouch","wager","waken",
+  "waste","watch","water","weary","weigh","weird","whale","wheat","wheel","where",
+  "which","while","white","whole","whose","wider","width","wield","witty","woman",
+  "women","world","worry","worse","worst","worth","would","wound","wrath","write",
+  "wrong","yacht","yearn","yield","young","youth","zesty","zilch","zippy","zones",
+  // --- extra common words, places, names ---
+  "aaron","abbot","abner","acorn","acres","actor","adder","addle","adorn","agnes",
+  "agile","aidan","aiken","aimed","aired","aisle","aitch","alder","alec","aleft",
+  "alert","alias","alice","alien","alike","aline","alive","allay","alley","allyn",
+  "alpha","alton","amber","amble","amend","ample","andes","angel","ankle","annex",
+  "apple","apply","april","ariel","arles","armed","armor","arnie","arora","array",
+  "arrow","arson","artic","aryan","ascot","ashen","asher","aside","atlas","atoll",
+  "attic","audio","augur","austin","avail","avery","avian","avid","avoca","awash",
+  "axles","azalea","babel","bader","badge","badly","baggy","balls","banco","bands",
+  "banff","banjo","banks","barge","baron","barry","basil","basin","baste","batch",
+  "bathe","baton","bawdy","bayou","beach","beady","bears","beech","being","belch",
+  "belle","belly","bench","berry","bevel","billy","birch","birds","black","bland",
+  "blare","blast","blaze","bleak","blend","bless","blimp","blimy","blink","bliss",
+  "block","blood","blown","blues","blurb","blurt","bobby","boggy","bogus","bolts",
+  "bongo","bonny","booze","bored","borne","boxer","brace","braid","brake","bream",
+  "breve","briar","brick","bride","brine","brink","briny","brook","broom","broth",
+  "bruce","brunt","buddy","budge","buggy","bulge","bully","bumpy","bunny","burnt",
+  "bursa","burst","buses","bushy","butch","bylaw","byrne","byron","cairo","camel",
+  "candy","canoe","canny","canon","cargo","carlo","carol","carry","caste","castle",
+  "catch","cater","cattle","cause","cease","chair","chalk","chaos","chase","cheap",
+  "cheep","chess","chief","chile","chime","chimp","china","chord","cinch","civic",
+  "clasp","cleat","clerk","click","cliff","cling","cloak","clone","cloth","cloud",
+  "clout","coach","cobra","comet","comma","conch","coral","corny","cover","cozen",
+  "crack","cramp","crank","crash","creak","creek","crest","crimp","crisp","cross",
+  "cruel","crumb","cruse","crux","curly","curry","curve","cynic","daisy","dance",
+  "darts","datum","daunt","david","decoy","defer","delta","derby","devon","digit",
+  "dingy","disco","dodge","dogma","dolly","downs","draft","drain","drape","drawn",
+  "dread","dried","drift","drill","drool","drove","drown","drums","druid","dusty",
+  "eager","eagle","early","ebony","edict","eerie","elbow","elect","elena","elite",
+  "emily","emmet","emory","empry","enact","enoch","envoy","epsom","ernie","essay",
+  "ethan","ethel","ethos","evade","event","exact","exalt","exile","extra","fable",
+  "fairy","faith","false","fancy","fargo","feral","feign","fence","felon","fetch",
+  "fiend","fifth","fifty","finch","final","fixed","fjord","flack","flame","flank",
+  "flask","flesh","flint","float","flock","flood","floor","flora","floss","fluid",
+  "flush","forte","foyer","foxes","frail","frank","fraud","fresh","fritz","frond",
+  "frost","froze","funny","futon","gamma","gauze","gavel","geese","genie","ghana",
+  "gilds","girth","given","gland","glare","glass","gleam","glean","glide","gloom",
+  "glove","gnome","goats","grace","grade","grain","grasp","grass","grave","greek",
+  "grief","grime","groan","groan","groom","grope","gross","grove","gruel","gruff",
+  "guard","guile","guilt","guise","gulch","gusto","gypsy","habit","handy","happy",
+  "harry","harsh","haven","hawke","haydn","heron","hedge","heist","hence","herbs",
+  "hinge","hippo","hoist","homer","honey","honky","horse","hotel","human","humor",
+  "hurry","hyena","ideal","idiom","image","imply","indie","infer","intro","ionic",
+  "irony","ivory","jacob","jaunt","jenny","jesse","joust","judge","juice","jumbo",
+  "jumpy","kathy","kenya","knife","knock","kudos","lance","large","latch","laugh",
+  "layer","leapt","learn","lease","ledge","legal","lemon","level","light","lithe",
+  "liver","local","lodge","logic","lorry","lover","lower","loyal","lucid","lucky",
+  "lunch","lusty","lying","magic","major","maker","manor","maple","march","mario",
+  "mason","match","mayor","media","mercy","merit","metal","might","model","money",
+  "month","moral","mourn","motor","mount","mouse","mouth","movie","muddy","music",
+  "naive","naval","nerve","night","noble","noise","north","notch","noted","novel",
+  "nymph","ocean","offer","often","olive","onset","orbit","order","oxide","ozone",
+  "paint","panel","panic","pasta","pause","peace","peach","pearl","peril","phase",
+  "phone","photo","piano","pitch","pixel","plain","plane","plank","plate","plaza",
+  "plead","pluck","plumb","plume","plush","point","poise","polar","pouch","pound",
+  "power","press","price","pride","prime","print","probe","prism","privy","prize",
+  "prone","proof","prose","proud","prove","prowl","prune","pulse","punch","pupil",
+  "purse","queen","quest","queue","quick","quiet","quirk","quota","quote","radar",
+  "radio","raise","rally","range","rapid","raven","reach","react","ready","realm",
+  "rebel","refer","reign","relax","relay","renew","repay","reply","rider","ridge",
+  "rifle","rigid","risky","rival","river","rivet","robot","rocky","rouge","rough",
+  "round","route","royal","rugby","ruler","rural","sable","saint","salad","sauce",
+  "scale","scamp","scant","scare","scarf","scene","scone","scope","score","scout",
+  "scowl","scrub","seize","sense","serve","setup","shade","shake","shall","shame",
+  "shank","shape","share","shark","sharp","shawl","shelf","shell","shift","shine",
+  "shirt","shock","shoot","shore","short","shout","shred","shrug","sight","silly",
+  "sixth","sixty","skill","skull","skunk","slave","sleek","sleep","slice","slick",
+  "slime","slide","slope","sloth","smart","smell","smile","smirk","smoke","snare",
+  "sneak","snide","sniff","snout","solid","solve","sooth","sorry","sound","south",
+  "space","spark","spawn","speak","speck","speed","spend","spice","spike","spine",
+  "split","spoke","spook","spoon","sport","spray","sprig","squad","squat","squid",
+  "stack","stage","stain","stake","stand","stare","start","state","stave","steam",
+  "steel","steep","steer","stern","stick","still","stock","stoic","stone","stood",
+  "store","storm","story","stove","stray","strip","strut","stuck","study","stuff",
+  "stump","stung","stunk","stunt","style","suave","sugar","suite","sulky","sunny",
+  "super","surge","swamp","swear","sweep","sweet","swept","sword","sworn","syrup",
+  "table","taken","taste","taunt","teach","teeth","tempo","tense","tenth","tepid",
+  "thank","their","theme","thick","tiger","tight","timer","tired","titan","title",
+  "today","token","tonic","total","touch","tough","towel","tower","toxic","trace",
+  "track","trade","trail","train","trait","trash","treat","trend","trial","tribe",
+  "trick","tried","tripe","troop","truck","truly","trump","trust","truth","tumor",
+  "tuned","tweed","twice","twist","typed","ultra","union","unite","unity","upper",
+  "upset","usage","usual","utter","vague","valid","value","valve","vapid","vault",
+  "video","vigor","viral","virus","visit","vista","vital","vivid","vocal","voice",
+  "voter","vouch","wager","waken","waste","watch","water","weary","weigh","weird",
+  "whale","wheat","wheel","while","white","whole","wield","witty","woman","women",
+  "world","worry","worse","worst","worth","wound","wrath","write","yacht","yearn",
+  // Places
+  "paris","tokyo","spain","wales","india","kenya","ghana","italy","chile","china",
+  "cairo","dover","derby","essex","egypt","france","deals","dover","elgin","essen",
+  "flint","genoa","hague","haifa","hanoi","havana","idaho","iowa","izmir","jaffa",
+  "kabul","kathmandu","lagos","laos","leeds","leith","lima","linz","lisbon","lhasa",
+  "miami","milan","minsk","monaco","monte","naple","nepal","niamey","niger","nile",
+  "norwich","ohio","oman","osaka","oslo","oulu","paris","perth","prague","praia",
+  "qatar","quito","rabat","reims","rhine","rhode","rioja","ripon","rouen","sofia",
+  "sudan","suez","surrey","sussex","swede","swiss","syria","tahoe","tbilisi","thames",
+  "tibet","tirol","tonga","tours","truro","tunis","turin","tuvalu","texas","uluru",
+  "ulster","umbria","upton","vaduz","venus","verdi","verona","vichy","volta","wales",
+  "warwick","wells","wessex","wick","worcester","wuhan","xerxes","xinhua","yakima",
+  "yemen","york","yukon","zagreb","zambia","zurich","abuja","accra","adana","agra",
+  "akron","aland","alatau","albany","aldan","aleppo","algiers","alpes","alsace",
+  "altai","amman","amora","amsden","angola","antalya","antwerp","aqaba","aral",
+  "arles","aruba","aswan","athen","athos","atlanta","atoll","attica","auvergne",
+  "avila","avon","avoca","azores","bafin","bagdad","baguio","bahia","baja","baku",
+  "balaton","bali","baltic","bamako","bandar","banff","bangui","banks","batumi",
+  "beirut","belfast","belgrade","belize","berne","bilbao","birma","sofia","bogota",
+  // Names (common first names, 5 letters)
+  "aaron","abbie","abbot","abner","abram","acton","adair","adela","adele","adena",
+  "adina","adler","adnan","adona","adria","adrie","ailey","aiken","ailee","aimon",
+  "ainsley","aisha","aiyana","alain","alana","alban","alben","albin","alden","aleck",
+  "alena","aleta","alexa","alexia","alfie","alger","algie","alida","alina","alisa",
+  "alise","aliza","alkie","allan","allen","alley","allie","allyn","alois","alona",
+  "aloof","alora","aloys","alten","alvin","alvina","alwyn","alyce","alyse","alysia",
+  "amada","amado","amare","amari","amaya","amber","ambia","amble","amelia","amena",
+  "amery","amias","amiel","amine","amira","amiya","amory","amund","amyas","anahi",
+  "anais","anand","anaya","ancel","andee","ander","andee","andre","andri","aneko",
+  "anela","anell","aneta","anett","angus","anila","anita","aniya","anmar","annie",
+  "anona","anora","ansel","anson","antia","antin","anton","antwa","anya","aoife",
+  "arash","ardan","arden","ardis","ardra","areli","arely","arene","ariah","arian",
+  "ariel","arjan","arlen","arley","arlys","arman","arnav","arnie","arron","arsen",
+  "arson","artis","artur","arvin","arwen","arwyn","asher","ashly","ashok","ashton",
+  "assia","astor","astri","asuka","asuna","atara","athos","atkin","atlas","atlee",
+  "augie","auria","aurie","auron","avery","avice","avish","aviya","avner","avrom",
+  "ayaan","ayala","ayame","ayano","ayasha","aydin","aylin","aysha","azana","azeem",
+  "aziza","azzie","barry","bella","betty","billy","bobby","brenda","brian","cathy",
+  "chuck","cindy","clara","clark","craig","daisy","danny","darryl","dawne","debra",
+  "diane","donna","doris","dotty","edgar","edith","edna","eleanor","elena","eliot",
+  "eliza","ellie","elsie","elvis","emily","emmie","ernie","esther","ethel","ethan",
+  "felix","fiona","flora","floyd","frank","freya","fritz","garth","gemma","gerry",
+  "giles","grace","grant","gregg","greta","griff","harold","harry","hazel","heath",
+  "helen","henry","holly","homer","honey","howie","hubert","hugo","hunter","irene",
+  "jacob","james","janet","jason","jenny","jerry","jesse","jimmy","jodie","jodie",
+  "joely","joemy","julia","julie","karen","katie","keith","kevin","lenny","leo",
+  "lewis","linda","lissy","lloyd","logan","lorna","louis","louisa","lucia","lucie",
+  "lukas","lynda","magda","mandy","marco","marie","mario","marty","mason","mateo",
+  "maudie","maxim","megan","mercy","meryl","miles","mindy","molly","myron","nadia",
+  "nancy","naomi","niall","niamh","nicky","nigel","norah","norma","olive","ollie",
+  "oscar","paige","pamela","peggy","percy","perry","peter","petra","polly","ralph",
+  "randy","regan","reece","reese","rhoda","rhona","rhone","rhys","ricky","riona",
+  "robby","robin","rocky","roddy","roger","ronda","rosie","rowan","royce","ruben",
+  "rufus","ryan","sabby","sally","sandy","sarah","scott","seema","shawn","signe",
+  "simon","sindy","sonia","sophie","stacy","steve","sukey","susan","susie","sylvie",
+  "tammy","tanya","teena","tessa","thora","tilly","timmy","tisha","tobias","tommy",
+  "tonia","tony","tracy","trish","trudy","tyler","ulric","uma","ursula","vanda",
+  "verna","viola","vivian","wanda","wendy","will","wilma","winnie","xena","xenia",
+  "yasmin","yolanda","zelda","zella","zelma","zivia","zofia","zowie"
+
+];
+
+// ── GAME STATE ──
+const ROWS = 6, COLS = 5;
+// Wordle cells start at spreadsheet row index 4 (0-based), col index 1 (B)
+const W_ROW_START = 4; // 0-based tbody row
+const W_COL_START = 1; // 0-based col in tbody (after row-num col)
+
+let target = '', currentRow = 0, currentCol = 0;
+let grid = []; // grid[r][c] = {el, letter, state}
+let gameOver = false;
+let usedWords = new Set();
+let keyStates = {}; // letter -> best state
+
+// ── COLUMN CONFIG ──
+const FIXED_COL_LETTERS = ['','A','B','C','D','E','F','G','H','I','J','K'];
+const FIXED_COL_WIDTHS  = [40, 88, 42, 42, 42, 42, 42, 78, 60, 90, 80, 60];
+const W_TABLE_COL = 2;
+
+function buildColConfig() {
+  const used = FIXED_COL_WIDTHS.reduce((a,b)=>a+b,0);
+  const remaining = Math.max(0, window.innerWidth - used - 16);
+  const extraCols = Math.ceil(remaining / 64);
+  const alphabet = 'LMNOPQRSTUVWXYZ';
+  const letters = [...FIXED_COL_LETTERS];
+  const widths  = [...FIXED_COL_WIDTHS];
+  for (let i = 0; i < extraCols && i < alphabet.length; i++) {
+    letters.push(alphabet[i]);
+    widths.push(Math.floor(remaining / extraCols));
+  }
+  return { letters, widths };
+}
+
+let COL_LETTERS, COL_WIDTHS;
+function refreshColConfig() {
+  const cfg = buildColConfig();
+  COL_LETTERS = cfg.letters;
+  COL_WIDTHS  = cfg.widths;
+}
+refreshColConfig();
+
+// ── SHEET THEMES ──
+let activeTheme = null;
+
+const SHEET_THEMES = [
+  {
+    filename: 'SalesTracker_Q4.xlsx',
+    tabName: 'Sheet1',
+    accent: '#1F7145',
+    titleText: 'Product Code Validation — Batch Q4-2025',
+    titleBg: '#1F5C8B',
+    colHeaders: ['','ID','Code-1','Code-2','Code-3','Code-4','Code-5','Batch Ref','Qty','Status','Notes'],
+    aboveRows: [
+      {id:'REF-019', letters:['P','R','I','C','E'], b:'B-2841', qty:'288', status:'✓ VALID', ok:true},
+      {id:'REF-020', letters:['S','T','O','C','K'], b:'B-2842', qty:'144', status:'✓ VALID', ok:true},
+    ],
+    belowRows: [
+      {id:'REF-027', letters:['T','R','A','D','E'], b:'B-2849', qty:'360', status:'✓ VALID', ok:true},
+      {id:'REF-028', letters:['A','U','D','I','T'], b:'B-2850', qty:'96',  status:'✓ VALID', ok:true},
+      {id:'REF-029', letters:['Y','I','E','L','D'], b:'B-2851', qty:'220', status:'⚠ REVIEW', ok:false},
+      {id:'REF-030', letters:['M','E','R','G','E'], b:'B-2852', qty:'180', status:'✓ VALID', ok:true},
+    ],
+    wordleIds: ['REF-021','REF-022','REF-023','REF-024','REF-025','REF-026'],
+    pendingStatus: 'PENDING',
+    matchStatus: (r) => r===0 ? '✓ MATCH' : r+'/5 matched',
+    mismatchNotes: (p) => p+' misplaced',
+    totalsLabel: 'TOTAL PROCESSED',
+    totalsVal: '1,728',
+    totalsSummary: '9 / 10 VALID',
+  },
+  {
+    filename: 'HR_Attendance_Nov2025.xlsx',
+    tabName: 'November',
+    accent: '#2E75B6',
+    titleText: 'Employee Attendance Log — November 2025',
+    titleBg: '#2E4057',
+    colHeaders: ['','Employee','Mon','Tue','Wed','Thu','Fri','Dept','Hours','Status','Notes'],
+    aboveRows: [
+      {id:'J.Mitchell', letters:['P','R','E','S','T'], b:'Finance', qty:'37.5', status:'✓ FULL WEEK', ok:true},
+      {id:'A.Okonkwo',  letters:['S','M','I','T','H'], b:'HR',      qty:'35.0', status:'✓ FULL WEEK', ok:true},
+    ],
+    belowRows: [
+      {id:'F.Yamamoto', letters:['T','R','A','C','E'], b:'IT',      qty:'37.5', status:'✓ FULL WEEK', ok:true},
+      {id:'C.Brennan',  letters:['G','R','A','N','T'], b:'Legal',   qty:'30.0', status:'⚠ PART TIME', ok:false},
+      {id:'R.Osei',     letters:['S','T','A','G','E'], b:'Ops',     qty:'37.5', status:'✓ FULL WEEK', ok:true},
+      {id:'D.Kowalski', letters:['B','L','A','Z','E'], b:'Sales',   qty:'37.5', status:'✓ FULL WEEK', ok:true},
+    ],
+    wordleIds: ['L.Ashford','T.Eriksen','M.Patel','S.Okonkwo','B.Russo','C.Nakamura'],
+    pendingStatus: 'NOT LOGGED',
+    matchStatus: (r) => r===0 ? '✓ VERIFIED' : r+'/5 correct',
+    mismatchNotes: (p) => p+' to check',
+    totalsLabel: 'DEPT TOTAL',
+    totalsVal: '297.5h',
+    totalsSummary: '9 / 10 Present',
+  },
+  {
+    filename: 'Inventory_WH3_Check.xlsx',
+    tabName: 'Warehouse 3',
+    accent: '#BF5500',
+    titleText: 'Warehouse 3 — Stock Code Audit October 2025',
+    titleBg: '#6B3A00',
+    colHeaders: ['','SKU','L1','L2','L3','L4','L5','Location','Count','Status','Notes'],
+    aboveRows: [
+      {id:'SKU-4401', letters:['C','R','A','T','E'], b:'Shelf A2', qty:'48',  status:'✓ COUNTED', ok:true},
+      {id:'SKU-4402', letters:['G','L','O','V','E'], b:'Shelf A3', qty:'120', status:'✓ COUNTED', ok:true},
+    ],
+    belowRows: [
+      {id:'SKU-4409', letters:['S','T','O','V','E'], b:'Bay C1',   qty:'12',  status:'✓ COUNTED', ok:true},
+      {id:'SKU-4410', letters:['P','L','A','N','T'], b:'Bay C2',   qty:'60',  status:'✓ COUNTED', ok:true},
+      {id:'SKU-4411', letters:['T','O','R','C','H'], b:'Bay C3',   qty:'33',  status:'⚠ RECOUNT',  ok:false},
+      {id:'SKU-4412', letters:['B','R','A','I','N'], b:'Bay D1',   qty:'200', status:'✓ COUNTED', ok:true},
+    ],
+    wordleIds: ['SKU-4403','SKU-4404','SKU-4405','SKU-4406','SKU-4407','SKU-4408'],
+    pendingStatus: 'UNCOUNTED',
+    matchStatus: (r) => r===0 ? '✓ MATCH' : r+'/5 matched',
+    mismatchNotes: (p) => p+' misplaced',
+    totalsLabel: 'TOTAL UNITS',
+    totalsVal: '2,304',
+    totalsSummary: '9 / 10 Audited',
+  },
+  {
+    filename: 'BudgetReview_FY26.xlsx',
+    tabName: 'FY26 Budget',
+    accent: '#7030A0',
+    titleText: 'FY2026 Budget Review — Cost Centre Codes',
+    titleBg: '#3A0070',
+    colHeaders: ['','Cost Centre','D1','D2','D3','D4','D5','Division','£ Budget','Status','Notes'],
+    aboveRows: [
+      {id:'CC-0712', letters:['F','I','N','C','H'], b:'Corporate', qty:'£48,500', status:'✓ APPROVED', ok:true},
+      {id:'CC-0713', letters:['R','A','V','E','N'], b:'Ops',       qty:'£72,000', status:'✓ APPROVED', ok:true},
+    ],
+    belowRows: [
+      {id:'CC-0720', letters:['G','R','A','C','E'], b:'Legal',     qty:'£55,000', status:'✓ APPROVED', ok:true},
+      {id:'CC-0721', letters:['B','L','U','N','T'], b:'IT',        qty:'£120,000',status:'✓ APPROVED', ok:true},
+      {id:'CC-0722', letters:['S','H','A','R','P'], b:'HR',        qty:'£31,200', status:'⚠ QUERY',    ok:false},
+      {id:'CC-0723', letters:['V','A','L','U','E'], b:'Finance',   qty:'£88,600', status:'✓ APPROVED', ok:true},
+    ],
+    wordleIds: ['CC-0714','CC-0715','CC-0716','CC-0717','CC-0718','CC-0719'],
+    pendingStatus: 'PENDING',
+    matchStatus: (r) => r===0 ? '✓ APPROVED' : r+'/5 matched',
+    mismatchNotes: (p) => p+' digit errors',
+    totalsLabel: 'TOTAL BUDGET',
+    totalsVal: '£2.1M',
+    totalsSummary: '9 / 10 Approved',
+  },
+  {
+    filename: 'ProjectTracker_Alpha.xlsx',
+    tabName: 'Sprint 14',
+    accent: '#C0392B',
+    titleText: 'Project Alpha — Sprint 14 Task Code Review',
+    titleBg: '#7B0000',
+    colHeaders: ['','Task ID','T1','T2','T3','T4','T5','Owner','Points','Status','Notes'],
+    aboveRows: [
+      {id:'T-1901', letters:['S','C','R','U','M'], b:'Dev Team', qty:'8pts', status:'✓ CLOSED', ok:true},
+      {id:'T-1902', letters:['S','P','R','I','N','T'].slice(0,5), b:'Backend', qty:'5pts', status:'✓ CLOSED', ok:true},
+    ],
+    belowRows: [
+      {id:'T-1909', letters:['B','U','I','L','D'], b:'DevOps',   qty:'3pts', status:'✓ CLOSED', ok:true},
+      {id:'T-1910', letters:['T','E','S','T','S'], b:'QA',       qty:'5pts', status:'✓ CLOSED', ok:true},
+      {id:'T-1911', letters:['P','A','T','C','H'], b:'Backend',  qty:'8pts', status:'⚠ IN REVIEW',ok:false},
+      {id:'T-1912', letters:['D','E','P','L','Y'].slice(0,5), b:'DevOps', qty:'13pts',status:'✓ CLOSED', ok:true},
+    ],
+    wordleIds: ['T-1903','T-1904','T-1905','T-1906','T-1907','T-1908'],
+    pendingStatus: 'OPEN',
+    matchStatus: (r) => r===0 ? '✓ CLOSED' : r+'/5 matched',
+    mismatchNotes: (p) => p+' fields wrong',
+    totalsLabel: 'SPRINT TOTAL',
+    totalsVal: '89 pts',
+    totalsSummary: '9 / 10 Closed',
+  },
+  {
+    filename: 'CustomerSurvey_Q3.xlsx',
+    tabName: 'Responses',
+    accent: '#2E75B6',
+    titleText: 'Q3 Customer Survey — Response Code Matching',
+    titleBg: '#1A3A6B',
+    colHeaders: ['','Resp. ID','R1','R2','R3','R4','R5','Region','Score','Status','Notes'],
+    aboveRows: [
+      {id:'R-8801', letters:['H','A','P','P','Y'], b:'London',  qty:'9.2', status:'✓ MATCHED', ok:true},
+      {id:'R-8802', letters:['T','R','U','S','T'], b:'Bristol', qty:'8.7', status:'✓ MATCHED', ok:true},
+    ],
+    belowRows: [
+      {id:'R-8809', letters:['V','A','L','U','E'], b:'Leeds',    qty:'8.1', status:'✓ MATCHED', ok:true},
+      {id:'R-8810', letters:['S','W','I','F','T'], b:'Glasgow',  qty:'9.5', status:'✓ MATCHED', ok:true},
+      {id:'R-8811', letters:['C','L','E','A','N'], b:'Cardiff',  qty:'7.3', status:'⚠ REVIEW',  ok:false},
+      {id:'R-8812', letters:['Q','U','I','C','K'], b:'Dublin',   qty:'9.0', status:'✓ MATCHED', ok:true},
+    ],
+    wordleIds: ['R-8803','R-8804','R-8805','R-8806','R-8807','R-8808'],
+    pendingStatus: 'PENDING',
+    matchStatus: (r) => r===0 ? '✓ MATCHED' : r+'/5 matched',
+    mismatchNotes: (p) => p+' unresolved',
+    totalsLabel: 'TOTAL RESPONSES',
+    totalsVal: '1,024',
+    totalsSummary: '9 / 10 Resolved',
+  },
+  {
+    filename: 'ITAssetAudit_2025.xlsx',
+    tabName: 'Asset Register',
+    accent: '#404040',
+    titleText: 'IT Asset Register — Device Tag Verification 2025',
+    titleBg: '#1A1A2E',
+    colHeaders: ['','Asset Tag','C1','C2','C3','C4','C5','Dept','Value','Status','Notes'],
+    aboveRows: [
+      {id:'IT-3301', letters:['A','P','P','L','E'], b:'Design',  qty:'£1,299', status:'✓ VERIFIED', ok:true},
+      {id:'IT-3302', letters:['D','E','L','T','A'], b:'Ops',     qty:'£899',  status:'✓ VERIFIED', ok:true},
+    ],
+    belowRows: [
+      {id:'IT-3309', letters:['L','I','N','U','X'], b:'IT Dept', qty:'£450',  status:'✓ VERIFIED', ok:true},
+      {id:'IT-3310', letters:['S','W','I','F','T'], b:'Dev',     qty:'£2,100',status:'✓ VERIFIED', ok:true},
+      {id:'IT-3311', letters:['C','L','O','U','D'], b:'IT Dept', qty:'£600',  status:'⚠ CHECK',   ok:false},
+      {id:'IT-3312', letters:['R','O','U','T','E'], b:'NetOps',  qty:'£380',  status:'✓ VERIFIED', ok:true},
+    ],
+    wordleIds: ['IT-3303','IT-3304','IT-3305','IT-3306','IT-3307','IT-3308'],
+    pendingStatus: 'UNVERIFIED',
+    matchStatus: (r) => r===0 ? '✓ VERIFIED' : r+'/5 matched',
+    mismatchNotes: (p) => p+' chars wrong',
+    totalsLabel: 'TOTAL ASSETS',
+    totalsVal: '£48,320',
+    totalsSummary: '9 / 10 Verified',
+  },
+  {
+    filename: 'StaffTraining_H2_2025.xlsx',
+    tabName: 'H2 Completions',
+    accent: '#375623',
+    titleText: 'Staff Training Completion Codes — H2 2025',
+    titleBg: '#1E3A10',
+    colHeaders: ['','Staff ID','M1','M2','M3','M4','M5','Team','Modules','Status','Notes'],
+    aboveRows: [
+      {id:'EMP-2201', letters:['L','E','A','R','N'], b:'Sales',   qty:'5/5', status:'✓ COMPLETE', ok:true},
+      {id:'EMP-2202', letters:['T','R','A','I','N'], b:'Service', qty:'5/5', status:'✓ COMPLETE', ok:true},
+    ],
+    belowRows: [
+      {id:'EMP-2209', letters:['G','R','O','W','T'].slice(0,5), b:'Ops',  qty:'5/5', status:'✓ COMPLETE', ok:true},
+      {id:'EMP-2210', letters:['S','K','I','L','L'], b:'IT',     qty:'5/5', status:'✓ COMPLETE', ok:true},
+      {id:'EMP-2211', letters:['B','R','I','E','F'], b:'Legal',  qty:'3/5', status:'⚠ PARTIAL',  ok:false},
+      {id:'EMP-2212', letters:['F','O','C','U','S'], b:'Finance',qty:'5/5', status:'✓ COMPLETE', ok:true},
+    ],
+    wordleIds: ['EMP-2203','EMP-2204','EMP-2205','EMP-2206','EMP-2207','EMP-2208'],
+    pendingStatus: 'INCOMPLETE',
+    matchStatus: (r) => r===0 ? '✓ COMPLETE' : r+'/5 matched',
+    mismatchNotes: (p) => p+' modules left',
+    totalsLabel: 'STAFF TOTAL',
+    totalsVal: '10 staff',
+    totalsSummary: '9 / 10 Complete',
+  },
+];
+
+// ── BUILD TABLE ──
+function applyTheme(theme) {
+  // Title bar filename
+  document.querySelector('.tb-title').innerHTML = theme.filename + ' — <span>Excel</span>';
+  document.title = theme.filename + ' - Excel';
+  // Sheet tab
+  document.querySelector('.tab.active').textContent = theme.tabName;
+  // Excel chrome is always green — only filename and tab name change
+}
+
+function buildSheet() {
+  const theme = activeTheme;
+  refreshColConfig();
+  const headerRow = document.getElementById('colHeaderRow');
+  headerRow.innerHTML = '';
+  COL_LETTERS.forEach((l, i) => {
+    const th = document.createElement('th');
+    th.className = 'col-header' + (i === 0 ? ' row-num-head' : '');
+    th.style.width = COL_WIDTHS[i] + 'px';
+    th.style.minWidth = COL_WIDTHS[i] + 'px';
+    th.id = i === 0 ? '' : 'ch-' + l;
+    th.textContent = i === 0 ? '' : l;
+    headerRow.appendChild(th);
+  });
+
+  const tbody = document.getElementById('sheetBody');
+  tbody.innerHTML = '';
+  let rowNum = 1;
+
+  // ── TITLE ROW ──
+  const titleTr = makeRow(rowNum++);
+  const titleTd = document.createElement('td');
+  titleTd.className = 'cell title-cell';
+  titleTd.colSpan = COL_LETTERS.length - 1;
+  titleTd.style.background = theme.titleBg;
+  titleTd.textContent = theme.titleText;
+  titleTr.appendChild(titleTd);
+  tbody.appendChild(titleTr);
+
+  // ── HEADER ROW ──
+  const headTr = makeRow(rowNum++);
+  theme.colHeaders.forEach((l, i) => {
+    if (i === 0) return;
+    const td = document.createElement('td');
+    td.className = 'cell header-cell';
+    td.style.width = COL_WIDTHS[i] + 'px';
+    td.textContent = l;
+    headTr.appendChild(td);
+  });
+  padExtraCols(headTr);
+  tbody.appendChild(headTr);
+
+  // ── ABOVE FAKE ROWS ──
+  theme.aboveRows.forEach(r => tbody.appendChild(makeFakeRow(rowNum++, r)));
+
+  // ── WORDLE ROWS ──
+  grid = [];
+  for (let r = 0; r < ROWS; r++) {
+    const tr = makeRow(rowNum++);
+    tr.id = 'wrow-' + r;
+    const rowCells = [];
+
+    const idTd = document.createElement('td');
+    idTd.className = 'cell fake fake-label';
+    idTd.style.width = COL_WIDTHS[1] + 'px';
+    idTd.style.fontSize = '11px';
+    idTd.textContent = theme.wordleIds[r];
+    tr.appendChild(idTd);
+
+    for (let c = 0; c < COLS; c++) {
+      const td = document.createElement('td');
+      td.className = 'cell w-cell';
+      td.style.width = COL_WIDTHS[W_TABLE_COL + c] + 'px';
+      td.id = 'w-' + r + '-' + c;
+      tr.appendChild(td);
+      rowCells.push({ el: td, letter: '', state: 'empty' });
+    }
+
+    const bTd = document.createElement('td');
+    bTd.className = 'cell fake';
+    bTd.style.fontSize = '11px';
+    bTd.style.color = '#808080';
+    bTd.textContent = theme.aboveRows[0].b.replace(/\d+$/, '') + (parseInt((theme.aboveRows[0].b.match(/\d+$/) || [3])[0]) + 2 + r);
+    tr.appendChild(bTd);
+
+    const qTd = document.createElement('td');
+    qTd.className = 'cell fake fake-num';
+    qTd.style.color = '#bbb';
+    qTd.textContent = '—';
+    tr.appendChild(qTd);
+
+    const sTd = document.createElement('td');
+    sTd.className = 'cell fake';
+    sTd.style.color = '#bbb';
+    sTd.textContent = theme.pendingStatus;
+    sTd.id = 'wstatus-' + r;
+    tr.appendChild(sTd);
+
+    const nTd = document.createElement('td');
+    nTd.className = 'cell fake';
+    nTd.style.color = '#ccc';
+    nTd.style.fontSize = '10px';
+    nTd.textContent = '';
+    nTd.id = 'wnotes-' + r;
+    tr.appendChild(nTd);
+    padExtraCols(tr);
+
+    tbody.appendChild(tr);
+    grid.push(rowCells);
+  }
+
+  // ── BELOW FAKE ROWS ──
+  theme.belowRows.forEach(r => tbody.appendChild(makeFakeRow(rowNum++, r)));
+
+  // ── TOTALS ROW ──
+  const totTr = makeRow(rowNum++);
+  const tTd = document.createElement('td');
+  tTd.className = 'cell fake fake-bold';
+  tTd.style.textAlign = 'right';
+  tTd.style.color = theme.titleBg;
+  tTd.textContent = theme.totalsLabel;
+  totTr.appendChild(tTd);
+  for (let i = 1; i < FIXED_COL_LETTERS.length - 3; i++) {
+    const td = document.createElement('td');
+    td.className = 'cell';
+    td.style.background = '#E2EFDA';
+    totTr.appendChild(td);
+  }
+  const sumTd = document.createElement('td');
+  sumTd.className = 'cell fake fake-bold fake-num';
+  sumTd.style.color = theme.titleBg;
+  sumTd.textContent = theme.totalsVal;
+  totTr.appendChild(sumTd);
+  const okTd = document.createElement('td');
+  okTd.className = 'cell fake fake-bold fake-green';
+  okTd.textContent = theme.totalsSummary;
+  totTr.appendChild(okTd);
+  padExtraCols(totTr);
+  tbody.appendChild(totTr);
+
+  // Extra blank rows
+  for (let i = 0; i < 12; i++) {
+    const tr = makeRow(rowNum++);
+    for (let j = 1; j < COL_LETTERS.length; j++) {
+      const td = document.createElement('td');
+      td.className = 'cell';
+      td.style.width = COL_WIDTHS[j] + 'px';
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+}
+
+function makeRow(num) {
+  const tr = document.createElement('tr');
+  const th = document.createElement('td');
+  th.className = 'cell row-num';
+  th.id = 'rn-' + num;
+  th.textContent = num;
+  tr.appendChild(th);
+  return tr;
+}
+
+function padExtraCols(tr) {
+  const extraStart = FIXED_COL_LETTERS.length; // 12
+  for (let i = extraStart; i < COL_LETTERS.length; i++) {
+    const td = document.createElement('td');
+    td.className = 'cell';
+    td.style.width = COL_WIDTHS[i] + 'px';
+    tr.appendChild(td);
+  }
+}
+
+function makeFakeRow(rowNum, r) {
+  const tr = makeRow(rowNum);
+  const idTd = document.createElement('td');
+  idTd.className = 'cell fake fake-label';
+  idTd.style.fontSize = '11px';
+  idTd.textContent = r.id;
+  tr.appendChild(idTd);
+  r.letters.forEach(l => {
+    const td = document.createElement('td');
+    td.className = 'cell w-cell fake-green';
+    td.style.color = '#375623';
+    td.textContent = l;
+    tr.appendChild(td);
+  });
+  const bTd = document.createElement('td');
+  bTd.className = 'cell fake';
+  bTd.style.fontSize = '11px';
+  bTd.textContent = r.b || r.batch || '';
+  tr.appendChild(bTd);
+  const qTd = document.createElement('td');
+  qTd.className = 'cell fake fake-num';
+  qTd.textContent = r.qty;
+  tr.appendChild(qTd);
+  const sTd = document.createElement('td');
+  sTd.className = 'cell fake' + (r.ok ? ' fake-green' : '');
+  sTd.textContent = r.status;
+  tr.appendChild(sTd);
+  const nTd = document.createElement('td');
+  nTd.className = 'cell fake';
+  nTd.style.fontSize = '10px';
+  nTd.style.color = '#aaa';
+  nTd.textContent = r.ok ? 'auto-verified' : 'needs review';
+  tr.appendChild(nTd);
+  padExtraCols(tr);
+  return tr;
+}
+
+// ── CELL ADDRESS ──
+function cellAddr(r, c) {
+  const colLetter = ['B','C','D','E','F'][c];
+  const rowNum = W_ROW_START + 1 + 1 + 2 + r + 1; // title(1)+header(1)+above(2)+r+1-indexed
+  // Actually just compute it simply: rows 1=title,2=header,3,4=above,5-10=wordle
+  return colLetter + (5 + r);
+}
+
+// ── UPDATE UI ──
+function updateActive() {
+  // Clear all active highlights
+  document.querySelectorAll('.w-cell').forEach(el => {
+    el.classList.remove('current-letter', 'active-guess');
+  });
+  document.querySelectorAll('.col-header').forEach(el => el.classList.remove('active-col'));
+  document.querySelectorAll('.row-num').forEach(el => el.classList.remove('active-row'));
+
+  if (gameOver) return;
+
+  // Highlight entire current row
+  for (let c = 0; c < COLS; c++) {
+    grid[currentRow][c].el.classList.add('active-guess');
+  }
+  // Highlight current letter cell
+  grid[currentRow][currentCol].el.classList.add('current-letter');
+
+  // Highlight col header
+  const colLetter = ['B','C','D','E','F'][currentCol];
+  const chEl = document.getElementById('ch-' + colLetter);
+  if (chEl) chEl.classList.add('active-col');
+
+  // Highlight row number
+  const addr = cellAddr(currentRow, currentCol);
+  const rowN = parseInt(addr.slice(1));
+  const rnEl = document.getElementById('rn-' + rowN);
+  if (rnEl) rnEl.classList.add('active-row');
+
+  // Update name box & formula bar
+  document.getElementById('nameBox').textContent = addr;
+  const letter = grid[currentRow][currentCol].letter;
+  document.getElementById('formulaVal').textContent = letter || '';
+  document.getElementById('stMode').textContent = letter ? 'Editing' : 'Ready';
+}
+
+function updateFormulaBar() {
+  const letter = grid[currentRow][Math.max(0, currentCol - 1)]?.letter || '';
+  const curLetter = grid[currentRow][currentCol]?.letter || '';
+  const addr = cellAddr(currentRow, currentCol);
+  document.getElementById('nameBox').textContent = addr;
+  document.getElementById('formulaVal').textContent = curLetter;
+}
+
+// ── PICK WORD ──
+function pickWord() {
+  let available = WORDS.filter(w => !usedWords.has(w));
+  if (available.length === 0) { usedWords.clear(); available = [...WORDS]; }
+  const w = available[Math.floor(Math.random() * available.length)];
+  usedWords.add(w);
+  return w.toUpperCase();
+}
+
+// ── NEW GAME ──
+let usedThemes = new Set();
+
+function pickTheme() {
+  let pool = SHEET_THEMES.filter(t => !usedThemes.has(t.filename));
+  if (pool.length === 0) { usedThemes.clear(); pool = [...SHEET_THEMES]; }
+  // Don't repeat current theme
+  if (activeTheme) pool = pool.filter(t => t.filename !== activeTheme.filename);
+  if (pool.length === 0) pool = SHEET_THEMES.filter(t => t.filename !== activeTheme.filename);
+  const t = pool[Math.floor(Math.random() * pool.length)];
+  usedThemes.add(t.filename);
+  return t;
+}
+
+function newGame() {
+  document.getElementById('modalBg').classList.remove('show');
+  currentRow = 0; currentCol = 0; gameOver = false; keyStates = {};
+
+  // Pick a new theme and rebuild the entire sheet
+  activeTheme = pickTheme();
+  applyTheme(activeTheme);
+  buildSheet();
+
+  target = pickWord();
+  document.getElementById('stMsg').textContent = '';
+  updateActive();
+  focusInp();
+}
+
+// ── SUBMIT GUESS ──
+function submitGuess() {
+  const guess = grid[currentRow].map(c => c.letter).join('');
+  if (guess.length < 5) { showToast('Not enough letters'); return; }
+  // Any 5-letter alphabetic string is accepted as a guess
+
+  // Evaluate
+  const result = ['absent','absent','absent','absent','absent'];
+  const targetArr = target.split('');
+  const guessArr  = guess.split('');
+  const used = [false,false,false,false,false];
+
+  // First pass: correct
+  for (let c = 0; c < 5; c++) {
+    if (guessArr[c] === targetArr[c]) {
+      result[c] = 'correct'; used[c] = true;
+    }
+  }
+  // Second pass: present
+  for (let c = 0; c < 5; c++) {
+    if (result[c] === 'correct') continue;
+    for (let t = 0; t < 5; t++) {
+      if (!used[t] && guessArr[c] === targetArr[t]) {
+        result[c] = 'present'; used[t] = true; break;
+      }
+    }
+  }
+
+  // Apply colours with stagger
+  result.forEach((state, c) => {
+    setTimeout(() => {
+      grid[currentRow][c].state = state;
+      grid[currentRow][c].el.className = 'cell w-cell ' + state + ' locked';
+      // Update key states
+      const l = guessArr[c];
+      const priority = {correct:3, present:2, absent:1};
+      if (!keyStates[l] || priority[state] > priority[keyStates[l]]) keyStates[l] = state;
+    }, c * 80);
+  });
+
+  // Update status cell after animation
+  setTimeout(() => {
+    const correct = result.filter(s => s === 'correct').length;
+    const sTd = document.getElementById('wstatus-' + currentRow);
+    const nTd = document.getElementById('wnotes-' + currentRow);
+    if (sTd) {
+      if (guess === target) {
+        const ms = activeTheme ? activeTheme.matchStatus(0) : '✓ MATCH';
+        sTd.textContent = ms; sTd.style.color = '#375623'; sTd.style.fontWeight = '600';
+      } else {
+        const ms = activeTheme ? activeTheme.matchStatus(correct) : correct+'/5 matched';
+        sTd.textContent = ms; sTd.style.color = '#595959';
+      }
+    }
+    if (nTd) {
+      const present = result.filter(s=>s==='present').length;
+      nTd.textContent = activeTheme ? activeTheme.mismatchNotes(present) : present+' misplaced';
+      nTd.style.color = '#888';
+    }
+
+    const won = guess === target;
+    if (won || currentRow === ROWS - 1) {
+      gameOver = true;
+      setTimeout(() => showResult(won), 400);
+    } else {
+      currentRow++;
+      currentCol = 0;
+      updateActive();
+    }
+  }, 5 * 80 + 100);
+}
+
+// ── SHOW RESULT ──
+function showResult(won) {
+  const msgs = ['Genius!','Brilliant!','Impressive!','Splendid!','Well done!','Phew!'];
+  document.getElementById('modalMsg').textContent = won
+    ? msgs[Math.min(currentRow, msgs.length-1)] + ' The code was correct.'
+    : 'The validation code was:';
+  document.getElementById('modalWord').textContent = target;
+  document.getElementById('modalSub').textContent = won
+    ? 'Found in ' + (currentRow + 1) + ' attempt' + (currentRow === 0 ? '' : 's') + '.'
+    : 'Better luck with the next batch.';
+  document.getElementById('stMsg').textContent = won ? '✓ Match found in ' + (currentRow+1) + ' attempt' + (currentRow===0?'':'s') : '✗ ' + (activeTheme ? activeTheme.pendingStatus : 'Not matched');
+  document.getElementById('modalBg').classList.add('show');
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+// ── INPUT ──
+const inp = document.getElementById('hiddenInp');
+
+function focusInp() { inp.focus(); }
+document.getElementById('sheetWrap').addEventListener('click', focusInp);
+
+inp.addEventListener('keydown', e => {
+  if (gameOver) return;
+
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    submitGuess();
+    return;
+  }
+
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    // If current cell has a letter, erase it without moving back
+    if (grid[currentRow][currentCol] && grid[currentRow][currentCol].letter) {
+      grid[currentRow][currentCol].letter = '';
+      grid[currentRow][currentCol].el.textContent = '';
+    } else if (currentCol > 0) {
+      // Otherwise move back and erase that cell
+      currentCol--;
+      grid[currentRow][currentCol].letter = '';
+      grid[currentRow][currentCol].el.textContent = '';
+    }
+    updateActive();
+    return;
+  }
+
+  if (e.key.length === 1 && e.key.match(/[a-zA-Z]/) && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    if (currentCol >= COLS) return;
+    const l = e.key.toUpperCase();
+    grid[currentRow][currentCol].letter = l;
+    grid[currentRow][currentCol].el.textContent = l;
+    if (currentCol < COLS - 1) currentCol++;
+    // At col 4 (last), don't advance — backspace will clear in-place
+    updateActive();
+    return;
+  }
+});
+
+document.addEventListener('keydown', () => { if (!gameOver) inp.focus(); });
+inp.addEventListener('blur', () => { if (!gameOver) setTimeout(() => inp.focus(), 30); });
+
+// ── INIT ──
+activeTheme = SHEET_THEMES[Math.floor(Math.random() * SHEET_THEMES.length)];
+applyTheme(activeTheme);
+buildSheet();
+target = pickWord();
+usedWords.add(target.toLowerCase());
+updateActive();
+focusInp();
+</script>
+</body>
+</html>

@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q3 Market Analysis - Word</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+  background: #f0f0f0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 12px;
+  color: #1a1a1a;
+  user-select: none;
+}
+
+/* ── TITLE BAR ── */
+.title-bar {
+  background: #2b579a;
+  color: white;
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 0 0 8px;
+  flex-shrink: 0;
+  gap: 0;
+}
+.tb-left { display: flex; align-items: center; gap: 6px; }
+.word-icon {
+  width: 20px; height: 20px; background: white; border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; color: #2b579a; flex-shrink: 0;
+  font-family: 'Times New Roman', serif;
+}
+.tb-qs { display: flex; gap: 1px; margin-left: 4px; }
+.tb-q {
+  width: 24px; height: 22px; display: flex; align-items: center;
+  justify-content: center; font-size: 11px; opacity: 0.8;
+  border-radius: 2px; cursor: pointer;
+}
+.tb-q:hover { background: rgba(255,255,255,0.2); opacity: 1; }
+.tb-title {
+  flex: 1; text-align: center; font-size: 12px;
+  font-weight: 400; opacity: 0.95; letter-spacing: 0.01em;
+}
+.tb-title span { opacity: 0.75; }
+.tb-controls { display: flex; }
+.tb-btn {
+  width: 46px; height: 30px; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; font-size: 10px; color: rgba(255,255,255,0.9);
+  transition: background 0.1s;
+}
+.tb-btn:hover { background: rgba(255,255,255,0.15); }
+.tb-btn.close:hover { background: #e81123; }
+
+/* ── RIBBON TABS ── */
+.ribbon-tabs {
+  background: #2b579a;
+  display: flex; align-items: flex-end;
+  padding: 0 8px; height: 28px; flex-shrink: 0;
+}
+.rtab {
+  padding: 4px 14px 5px; font-size: 12px;
+  color: rgba(255,255,255,0.82); cursor: pointer;
+  border-radius: 3px 3px 0 0; transition: all 0.1s;
+}
+.rtab:hover { background: rgba(255,255,255,0.12); color: white; }
+.rtab.active { background: #f0f0f0; color: #1a1a1a; font-weight: 600; }
+
+/* ── RIBBON ── */
+.ribbon {
+  background: #f0f0f0;
+  border-bottom: 1px solid #bbb;
+  display: flex; align-items: stretch;
+  padding: 2px 4px 0 8px;
+  height: 72px; flex-shrink: 0; overflow: hidden;
+}
+.rg {
+  display: flex; flex-direction: column;
+  padding: 0 6px 0px; border-right: 1px solid #d1d1d1;
+  align-items: center; min-width: 0;
+}
+.rg:last-child { border-right: none; }
+.rg-body { display: flex; flex: 1; align-items: center; gap: 2px; padding: 4px 0 2px; }
+.rg-label { font-size: 9px; color: #666; padding-bottom: 3px; white-space: nowrap; }
+
+/* Ribbon buttons */
+.rb-big {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px; padding: 3px 6px; border-radius: 3px;
+  cursor: pointer; border: 1px solid transparent;
+  font-size: 9px; color: #222; min-width: 32px;
+  height: 56px; justify-content: center;
+}
+.rb-big:hover { background: #dce6f7; border-color: #b8ccef; }
+.rb-big svg { width: 20px; height: 20px; }
+.rb-col { display: flex; flex-direction: column; gap: 2px; }
+.rb-sm {
+  display: flex; align-items: center; gap: 2px;
+  padding: 1px 4px; border-radius: 2px;
+  cursor: pointer; border: 1px solid transparent;
+  font-size: 11px; color: #222; height: 22px; white-space: nowrap;
+}
+.rb-sm:hover { background: #dce6f7; border-color: #b8ccef; }
+.rb-sep { width: 1px; background: #d1d1d1; height: 54px; margin: 0 3px; }
+
+/* Form controls */
+.rsel {
+  height: 22px; font-size: 11px; font-family: inherit;
+  border: 1px solid #c0c0c0; background: white;
+  border-radius: 2px; color: #222; padding: 0 4px;
+}
+.rfmt {
+  width: 22px; height: 22px; display: flex; align-items: center;
+  justify-content: center; border: 1px solid transparent;
+  border-radius: 2px; cursor: pointer; font-size: 12px;
+  color: #222; font-family: 'Times New Roman', serif;
+}
+.rfmt:hover { background: #dce6f7; border-color: #b8ccef; }
+.rfmt.B { font-weight: bold; } .rfmt.I { font-style: italic; }
+.rfmt.U { text-decoration: underline; }
+
+/* Styles thumbnails */
+.style-thumb {
+  border: 1px solid #c8c8c8; background: white;
+  padding: 2px 6px; border-radius: 2px; cursor: pointer;
+  font-size: 11px; color: #222; white-space: nowrap; min-width: 72px;
+  height: 22px; display: flex; align-items: center;
+}
+.style-thumb:hover { background: #dce6f7; border-color: #b8ccef; }
+.style-thumb.active { border-color: #2b579a; background: #dce6f7; }
+
+/* ── RULER ── */
+.ruler-wrap {
+  background: #f0f0f0;
+  border-bottom: 1px solid #c0c0c0;
+  height: 22px; flex-shrink: 0;
+  display: flex; align-items: stretch;
+  overflow: hidden;
+}
+.ruler-corner { width: 22px; flex-shrink: 0; border-right: 1px solid #c0c0c0; }
+.ruler-body {
+  flex: 1; position: relative; overflow: hidden;
+  display: flex; justify-content: center;
+}
+.ruler-inner {
+  width: 760px; height: 100%; position: relative;
+  display: flex; align-items: flex-end;
+}
+.ruler-margin { background: #e0e0e0; width: 96px; height: 100%; }
+.ruler-content {
+  flex: 1; background: white; height: 100%;
+  border-left: 1px solid #aaa; border-right: 1px solid #aaa;
+  display: flex; align-items: flex-end; padding: 0 4px; gap: 0;
+  font-size: 8px; color: #555;
+}
+.ruler-inch { flex: 1; display: flex; align-items: flex-end; justify-content: center; border-left: 1px solid #bbb; height: 8px; font-size: 8px; line-height: 1; padding-bottom: 1px; }
+.ruler-inch:first-child { border-left: none; }
+.ruler-half { flex: 1; border-left: 1px solid #ccc; height: 5px; display: flex; align-items: flex-end; }
+.ruler-indent-left {
+  position: absolute; top: 2px; left: calc(96px + 12px);
+  width: 0; height: 0;
+  border-left: 5px solid transparent; border-right: 5px solid transparent;
+  border-top: 6px solid #666;
+  cursor: ew-resize;
+}
+.ruler-margin-right { background: #e0e0e0; width: 96px; height: 100%; }
+
+/* ── DOCUMENT SCROLL ── */
+.doc-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  background: #939393;
+  display: flex; flex-direction: column;
+  align-items: center; padding: 20px 0 40px;
+}
+.doc-scroll::-webkit-scrollbar { width: 15px; }
+.doc-scroll::-webkit-scrollbar-track { background: #c8c8c8; }
+.doc-scroll::-webkit-scrollbar-thumb {
+  background: #a0a0a0; border: 3px solid #c8c8c8; border-radius: 1px;
+}
+.doc-scroll::-webkit-scrollbar-thumb:hover { background: #888; }
+
+/* ── PAGE ── */
+.page {
+  width: 760px;
+  min-height: 1040px;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+  padding: 96px 96px 96px 96px;
+  position: relative;
+  flex-shrink: 0;
+  cursor: text;
+}
+
+/* Hidden input */
+#inp {
+  position: absolute; opacity: 0; pointer-events: none;
+  top: 0; left: 0; width: 1px; height: 1px;
+}
+
+/* ── DOCUMENT CONTENT ── */
+.doc-body {
+  font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+  font-size: 16px; /* 12pt */
+  line-height: 1.55;
+  color: #000;
+}
+
+/* Memo header — pre-filled, not typed */
+.memo-header {
+  margin-bottom: 24px;
+  font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.8;
+}
+.memo-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f3864;
+  margin-bottom: 12px;
+  font-family: 'Calibri Light', Calibri, Arial, sans-serif;
+  border-bottom: 2px solid #2b579a;
+  padding-bottom: 6px;
+}
+.memo-row { display: flex; gap: 0; }
+.memo-key { width: 72px; font-weight: 700; color: #333; flex-shrink: 0; }
+.memo-val { color: #555; }
+
+.doc-divider {
+  border: none; border-top: 1px solid #e0e0e0;
+  margin: 20px 0;
+}
+
+/* Typing area — the passage being typed */
+.typing-area {
+  font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.65;
+  color: #000;
+  word-wrap: break-word;
+  word-break: normal;
+  white-space: normal;
+  position: relative;
+}
+
+/* Characters */
+.ch       { display: inline; font-weight: 500; }
+.ch.done  { color: #111; }
+.ch.ghost { color: #aaa; font-weight: 400; }
+/* Typo: soft red background, text stays readable, pinpoints the exact character */
+.ch.err   {
+  color: #111;
+  background: #fca5a5;
+  border-radius: 2px;
+}
+
+/* Single floating caret repositioned in JS via offsetLeft/offsetTop */
+#caret {
+  position: absolute;
+  width: 2px;
+  background: #000;
+  border-radius: 1px;
+  pointer-events: none;
+  animation: blink 1.1s step-end infinite;
+  z-index: 2;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Results modal */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  display: none; align-items: center; justify-content: center; z-index: 100;
+}
+.modal-bg.show { display: flex; }
+.modal {
+  background: white; width: 440px; border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+  overflow: hidden; font-family: 'Segoe UI', sans-serif;
+}
+.modal-head {
+  background: #2b579a; color: white;
+  padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+}
+.modal-head-title { font-size: 14px; font-weight: 600; }
+.modal-body { padding: 20px; }
+.modal-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+}
+.m-card {
+  background: #f5f8ff; border: 1px solid #d0dcf0;
+  border-radius: 4px; padding: 12px 16px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.m-val { font-size: 36px; font-weight: 700; color: #2b579a; line-height: 1; }
+.m-lbl { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+.modal-btns { display: flex; justify-content: flex-end; gap: 8px; }
+.btn-primary {
+  background: #2b579a; color: white; border: none;
+  padding: 7px 20px; border-radius: 2px; font-size: 12px;
+  font-family: 'Segoe UI', sans-serif; cursor: pointer;
+}
+.btn-primary:hover { background: #1e3f6f; }
+.btn-secondary {
+  background: white; color: #333; border: 1px solid #c0c0c0;
+  padding: 7px 20px; border-radius: 2px; font-size: 12px;
+  font-family: 'Segoe UI', sans-serif; cursor: pointer;
+}
+.btn-secondary:hover { background: #f0f0f0; }
+
+/* ── STATUS BAR ── */
+.status-bar {
+  background: #2b579a; color: rgba(255,255,255,0.88);
+  height: 22px; display: flex; align-items: center;
+  padding: 0 12px; font-size: 11px; gap: 0; flex-shrink: 0;
+}
+.st { padding: 0 10px; cursor: default; border-right: 1px solid rgba(255,255,255,0.15); height: 100%; display: flex; align-items: center; }
+.st:last-child { border-right: none; }
+.st:hover { background: rgba(255,255,255,0.12); }
+.st-right { margin-left: auto; display: flex; }
+.zoom-wrap { display: flex; align-items: center; gap: 5px; padding: 0 10px; }
+input[type=range].zoom {
+  -webkit-appearance: none; width: 80px; height: 3px;
+  background: rgba(255,255,255,0.4); outline: none; border-radius: 2px;
+}
+input[type=range].zoom::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 12px; height: 12px;
+  background: white; border-radius: 50%; cursor: pointer;
+}
+/* Stats hidden in status bar — looks like word count */
+#st-wpm { opacity: 0.88; }
+</style>
+</head>
+<body>
+
+<!-- TITLE BAR -->
+<div class="title-bar">
+  <div class="tb-left">
+    <div class="word-icon">W</div>
+    <div class="tb-qs">
+      <div class="tb-q" title="Save">💾</div>
+      <div class="tb-q" title="Undo">↩</div>
+      <div class="tb-q" title="Redo">↪</div>
+    </div>
+  </div>
+  <div class="tb-title">Q3 Market Analysis — <span>Word</span></div>
+  <div class="tb-controls">
+    <div class="tb-btn">?</div>
+    <div class="tb-btn" style="font-size:8px">🔲</div>
+    <div class="tb-btn">─</div>
+    <div class="tb-btn" style="font-size:9px">⬜</div>
+    <div class="tb-btn close">✕</div>
+  </div>
+</div>
+
+<!-- RIBBON TABS -->
+<div class="ribbon-tabs">
+  <div class="rtab">File</div>
+  <div class="rtab active">Home</div>
+  <div class="rtab">Insert</div>
+  <div class="rtab">Design</div>
+  <div class="rtab">Layout</div>
+  <div class="rtab">References</div>
+  <div class="rtab">Mailings</div>
+  <div class="rtab">Review</div>
+  <div class="rtab">View</div>
+  <div class="rtab">Help</div>
+</div>
+
+<!-- RIBBON BODY -->
+<div class="ribbon">
+  <!-- Clipboard -->
+  <div class="rg">
+    <div class="rg-body">
+      <div class="rb-big">
+        <svg viewBox="0 0 22 22" fill="none" stroke="#444" stroke-width="1.4">
+          <rect x="5" y="3" width="9" height="13" rx="1"/>
+          <rect x="8" y="1" width="6" height="4" rx="1" fill="white" stroke="#444"/>
+          <line x1="7" y1="8" x2="12" y2="8"/><line x1="7" y1="11" x2="12" y2="11"/>
+          <line x1="7" y1="14" x2="10" y2="14"/>
+          <rect x="3" y="6" width="9" height="13" rx="1" fill="white" stroke="#444"/>
+          <line x1="5" y1="10" x2="10" y2="10"/><line x1="5" y1="13" x2="10" y2="13"/>
+          <line x1="5" y1="16" x2="8" y2="16"/>
+        </svg>
+        Paste
+      </div>
+      <div class="rb-sep"></div>
+      <div class="rb-col">
+        <div class="rb-sm">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#444" stroke-width="1.3"><rect x="1" y="1" width="8" height="10" rx="1"/><line x1="3" y1="4" x2="7" y2="4"/><line x1="3" y1="6.5" x2="7" y2="6.5"/><line x1="3" y1="9" x2="5.5" y2="9"/></svg>
+          Cut
+        </div>
+        <div class="rb-sm">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#444" stroke-width="1.3"><rect x="1" y="1" width="8" height="10" rx="1"/><rect x="4" y="4" width="8" height="10" rx="1" fill="white" stroke="#444"/></svg>
+          Copy
+        </div>
+        <div class="rb-sm">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#444" stroke-width="1.3"><path d="M2 12 L4 2 L7 8 L10 2 L12 12" stroke-linejoin="round"/></svg>
+          Format Painter
+        </div>
+      </div>
+    </div>
+    <div class="rg-label">Clipboard</div>
+  </div>
+
+  <!-- Font -->
+  <div class="rg">
+    <div class="rg-body" style="flex-direction:column;gap:3px;align-items:flex-start">
+      <div style="display:flex;gap:3px;align-items:center">
+        <select class="rsel" style="width:128px"><option>Calibri (Body)</option><option>Arial</option><option>Times New Roman</option><option>Cambria</option><option>Garamond</option></select>
+        <select class="rsel" style="width:40px;text-align:center"><option>10</option><option selected>11</option><option>12</option><option>14</option><option>16</option><option>18</option></select>
+        <div class="rb-sm" style="font-size:13px;font-weight:bold;padding:0 3px">A⁺</div>
+        <div class="rb-sm" style="font-size:13px;padding:0 3px">A⁻</div>
+        <div class="rb-sm" style="font-size:10px;padding:0 3px">Aₐ</div>
+      </div>
+      <div style="display:flex;gap:2px;align-items:center">
+        <div class="rfmt B">B</div>
+        <div class="rfmt I">I</div>
+        <div class="rfmt U">U</div>
+        <div class="rfmt" style="text-decoration:line-through;font-family:inherit">S</div>
+        <div class="rb-sep" style="height:18px;margin:0 2px"></div>
+        <div class="rb-sm" style="font-size:10px">x²</div>
+        <div class="rb-sm" style="font-size:10px">x₂</div>
+        <div class="rb-sep" style="height:18px;margin:0 2px"></div>
+        <div class="rb-sm" style="background:#ffff00;border-color:#e0d000;padding:0 5px">A</div>
+        <div class="rb-sm" style="color:#c00;font-weight:bold;padding:0 5px">A</div>
+      </div>
+    </div>
+    <div class="rg-label">Font</div>
+  </div>
+
+  <!-- Paragraph -->
+  <div class="rg">
+    <div class="rg-body" style="flex-direction:column;gap:3px;align-items:flex-start">
+      <div style="display:flex;gap:2px">
+        <div class="rb-sm">≡·</div>
+        <div class="rb-sm">1.</div>
+        <div class="rb-sm">☑</div>
+        <div class="rb-sep" style="height:18px;margin:0 2px"></div>
+        <div class="rb-sm">←</div>
+        <div class="rb-sm">→</div>
+        <div class="rb-sep" style="height:18px;margin:0 2px"></div>
+        <div class="rb-sm">↕</div>
+        <div class="rb-sm">▥</div>
+        <div class="rb-sm">¶</div>
+      </div>
+      <div style="display:flex;gap:2px">
+        <div class="rb-sm" style="font-size:14px">≡</div>
+        <div class="rb-sm" style="font-size:14px">≡</div>
+        <div class="rb-sm" style="font-size:14px;font-weight:bold">≡</div>
+        <div class="rb-sm" style="font-size:14px">≡</div>
+        <div class="rb-sep" style="height:18px;margin:0 2px"></div>
+        <div class="rb-sm">⇿</div>
+        <div class="rb-sm" style="background:#dce6f7;border-color:#b8ccef">□</div>
+      </div>
+    </div>
+    <div class="rg-label">Paragraph</div>
+  </div>
+
+  <!-- Styles -->
+  <div class="rg">
+    <div class="rg-body" style="flex-direction:column;gap:3px">
+      <div class="style-thumb active" style="color:#2b579a;font-weight:400">AaBbCcDd   Normal</div>
+      <div class="style-thumb" style="font-size:13px;font-weight:700;color:#1f3864">AaBb   Heading 1</div>
+      <div class="style-thumb" style="font-size:12px;font-weight:700;color:#2e74b5">AaBb   Heading 2</div>
+    </div>
+    <div class="rg-label">Styles</div>
+  </div>
+
+  <!-- Editing -->
+  <div class="rg">
+    <div class="rg-body" style="flex-direction:column;gap:3px">
+      <div class="rb-sm">🔍  Find  ▾</div>
+      <div class="rb-sm">↔  Replace</div>
+      <div class="rb-sm">↖  Select  ▾</div>
+    </div>
+    <div class="rg-label">Editing</div>
+  </div>
+
+  <!-- Voice -->
+  <div class="rg">
+    <div class="rg-body">
+      <div class="rb-big">
+        <svg viewBox="0 0 22 22" fill="none" stroke="#444" stroke-width="1.4">
+          <rect x="8" y="2" width="6" height="11" rx="3"/>
+          <path d="M4 12 C4 17 18 17 18 12"/><line x1="11" y1="17" x2="11" y2="20"/>
+          <line x1="7" y1="20" x2="15" y2="20"/>
+        </svg>
+        Dictate
+      </div>
+    </div>
+    <div class="rg-label">Voice</div>
+  </div>
+
+  <!-- Editor -->
+  <div class="rg">
+    <div class="rg-body">
+      <div class="rb-big">
+        <svg viewBox="0 0 22 22" fill="none" stroke="#444" stroke-width="1.4">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M9 8 L13 11 L9 14" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Editor
+      </div>
+    </div>
+    <div class="rg-label">AI</div>
+  </div>
+</div>
+
+<!-- RULER -->
+<div class="ruler-wrap">
+  <div class="ruler-corner"></div>
+  <div class="ruler-body">
+    <div class="ruler-inner">
+      <div class="ruler-margin"></div>
+      <div class="ruler-content">
+        <div class="ruler-inch">1</div>
+        <div class="ruler-inch">2</div>
+        <div class="ruler-inch">3</div>
+        <div class="ruler-inch">4</div>
+        <div class="ruler-inch">5</div>
+        <div class="ruler-inch">6</div>
+      </div>
+      <div class="ruler-margin-right"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DOCUMENT -->
+<div class="doc-scroll" id="docScroll">
+  <div class="page" id="page">
+    <input id="inp" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+    <div class="doc-body">
+      <div id="docHeader">
+      <!-- Pre-filled memo header — looks like a real document already in progress -->
+      <div class="memo-title">Q3 Market Analysis Report</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">To:</span><span class="memo-val">Leadership Team, Strategy Division</span></div>
+        <div class="memo-row"><span class="memo-key">From:</span><span class="memo-val">Research &amp; Analytics Department</span></div>
+        <div class="memo-row"><span class="memo-key">Date:</span><span class="memo-val" id="docDate"></span></div>
+        <div class="memo-row"><span class="memo-key">Re:</span><span class="memo-val">Third Quarter Performance Summary and Strategic Outlook</span></div>
+      </div>
+      <hr class="doc-divider">
+      </div>
+
+      <!-- The typing area -->
+      <div class="typing-area" id="typingArea" style="position:relative"><div id="caret"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-head">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.8">
+        <path d="M4 10 L8 14 L16 6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="modal-head-title">Document Complete — Typing Results</div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid" id="modalGrid"></div>
+      <div class="modal-btns">
+        <button class="btn-secondary" onclick="initTest()">New Document</button>
+        <button class="btn-primary" onclick="document.getElementById('modalBg').classList.remove('show')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="st">Page 1 of 1</div>
+  <div class="st" id="st-words">Words: 0</div>
+  <div class="st">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" style="margin-right:3px"><circle cx="6" cy="6" r="5"/><path d="M4 6 L5.5 7.5 L8 4.5"/></svg>
+    Spelling and Grammar Check
+  </div>
+  <div class="st">English (United Kingdom)</div>
+  <div class="st-right">
+    <div class="st" id="st-wpm">WPM: —</div>
+    <div class="st" id="st-acc">Acc: —</div>
+    <div class="st" id="st-time">⏱ 60s</div>
+    <div class="st">📖</div>
+    <div class="st">🖨</div>
+    <div class="st">🌐</div>
+    <div class="zoom-wrap">
+      <span style="font-size:10px">─</span>
+      <input type="range" class="zoom" value="100" min="50" max="200">
+      <span style="font-size:10px">+</span>
+      <span>100%</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const today = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+document.getElementById('docDate').textContent = today;
+
+// ── THEMES: each has a header renderer + passage (all British English) ──
+const THEMES = [
+  {
+    title: 'Q3 Market Analysis Report',
+    buildHeader: () => `
+      <div class="memo-title">Q3 Market Analysis Report</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">To:</span><span class="memo-val">Leadership Team, Strategy Division</span></div>
+        <div class="memo-row"><span class="memo-key">From:</span><span class="memo-val">Research &amp; Analytics Department</span></div>
+        <div class="memo-row"><span class="memo-key">Date:</span><span class="memo-val">${today}</span></div>
+        <div class="memo-row"><span class="memo-key">Re:</span><span class="memo-val">Third Quarter Performance Summary and Strategic Outlook</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "This report presents a comprehensive overview of our performance during the third quarter, highlighting key areas of growth as well as the challenges that have shaped our strategic direction. Revenue across core business units exceeded projections by approximately twelve per cent, driven primarily by strong demand in the enterprise segment and improved margins in our subscription-based product lines. Customer acquisition costs declined steadily throughout the period, reflecting the maturation of our go-to-market efforts and greater efficiency in digital advertising spend. Our international expansion continued at a measured pace, with new market entries in three additional territories contributing modestly to overall revenue whilst laying important groundwork for future growth. The operations team successfully reduced overhead expenses by consolidating redundant processes and renegotiating key supplier contracts, resulting in meaningful improvements to our operating margin."
+  },
+  {
+    title: 'Chicken Tikka Masala — Family Recipe',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#7b3f00;border-color:#c0703a">Chicken Tikka Masala</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Serves:</span><span class="memo-val">4 people &nbsp;·&nbsp; Prep: 20 min &nbsp;·&nbsp; Cook: 40 min</span></div>
+        <div class="memo-row"><span class="memo-key">From:</span><span class="memo-val">Grandma Ruth's Recipe Collection, edited ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "Marinate the chicken pieces in yoghurt, lemon juice, turmeric, garam masala, and a generous pinch of salt for at least two hours, though overnight in the fridge yields far better results. When ready to cook, thread the chicken onto skewers and grill under a hot oven grill until lightly charred at the edges, then set aside. In a wide heavy pan, melt butter with a little oil and gently fry the onions until golden and soft, stirring frequently to prevent burning. Add ginger and garlic paste and cook for two minutes before stirring in the tomato puree, ground cumin, coriander, paprika, and chilli powder. Pour in the double cream and let the sauce simmer on a low heat for fifteen minutes until it thickens and deepens in colour. Add the cooked chicken pieces and fold them gently through the sauce, allowing everything to cook together for another ten minutes before finishing with fresh coriander."
+  },
+  {
+    title: 'Dear Emily — Personal Letter',
+    buildHeader: () => `
+      <div class="memo-header" style="line-height:1.9;margin-bottom:18px">
+        <div style="text-align:right;color:#555;margin-bottom:16px">14 Birchwood Lane, Oxford<br>${today}</div>
+        <div style="margin-bottom:12px;font-size:16px">Dear Emily,</div>
+      </div>`,
+    passage: "I have been meaning to write to you for weeks now but somehow the days keep slipping past before I find the right moment to sit down and collect my thoughts properly. Life here has been quieter than usual since the renovation finished and I have been spending long evenings in the garden now that the weather has finally turned. The roses along the back wall came back beautifully this year and I think of you whenever I look at them, remembering how you always said that garden was wasted on someone with as little patience for pruning as me. I saw your mother briefly at the market last Tuesday and she told me about your new position, which sounds absolutely wonderful and so well deserved after everything you put into that last role. I do hope the commute is manageable and that you are finding time to rest properly between all the excitement of starting somewhere new."
+  },
+  {
+    title: 'Two Weeks in Japan — Travel Notes',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#1a3a5c;border-color:#4a7fb5">Two Weeks in Japan</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Trip:</span><span class="memo-val">Tokyo · Kyoto · Osaka · Hiroshima</span></div>
+        <div class="memo-row"><span class="memo-key">Notes by:</span><span class="memo-val">Personal travel journal, updated ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "Arriving at Narita after thirteen hours in the air, the first thing that strikes you is the quiet efficiency of everything, from the baggage carousels to the train connections, each step unfolding with a calm precision that feels almost choreographed. The Narita Express deposits you at Shinjuku station which is so vast and so labyrinthine that even seasoned travellers lose their bearings, but helpful signs in English appear just when you need them most. Tokyo rewards the visitor who wanders without a fixed agenda, ducking into covered shopping arcades lined with tiny specialist shops and pausing for ramen at a ten-seat counter where the broth has been simmering since before dawn. The bullet train south to Kyoto passes Mount Fuji on a clear morning and the mountain appears so perfectly shaped that it looks almost imagined, hovering above the plain in the early mist."
+  },
+  {
+    title: 'The Last Light of Summer — Chapter 7',
+    buildHeader: () => `
+      <div class="memo-title" style="font-style:italic;color:#2c2c2c;border-color:#888">The Last Light of Summer</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key" style="width:100px">Chapter:</span><span class="memo-val">Seven — The Return</span></div>
+        <div class="memo-row"><span class="memo-key" style="width:100px">Draft:</span><span class="memo-val">Second revision, ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "She had not expected the house to look so small. In the years since she had left, it had grown enormous in memory, filling the imagined landscape of her childhood with high ceilings and long corridors that apparently existed nowhere except inside her own head. The real house was modest, set back from the lane behind an overgrown privet hedge that nobody had trimmed since her father stopped caring about such things. She sat in the car for a long moment before opening the door, listening to the engine tick as it cooled and watching a light move behind the frosted glass of the kitchen window. The gate needed lifting to open properly, the same as it always had, and that small familiar resistance undid something in her chest that she had been keeping carefully sealed for a very long time."
+  },
+  {
+    title: 'Weekly Team Update — Engineering',
+    buildHeader: () => `
+      <div class="memo-title">Weekly Engineering Update</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">To:</span><span class="memo-val">Product &amp; Engineering All-Hands</span></div>
+        <div class="memo-row"><span class="memo-key">From:</span><span class="memo-val">Engineering Lead</span></div>
+        <div class="memo-row"><span class="memo-key">Date:</span><span class="memo-val">${today}</span></div>
+        <div class="memo-row"><span class="memo-key">Sprint:</span><span class="memo-val">Week ending ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "The team shipped the redesigned authentication flow on Wednesday following three weeks of iteration and a thorough security review, and early signals from production look encouraging with error rates down significantly compared to the previous implementation. Infrastructure work continued in the background with the database migration completing successfully overnight on Tuesday, resulting in measurable query performance improvements across the most heavily trafficked endpoints. Two previously escalated bugs affecting users on older Android devices were resolved and the fixes are included in the build going to production this Friday. On the recruitment front we extended an offer to a senior backend engineer whose start date is confirmed for next month, and first-round interviews are under way for the open frontend position. Next week the team will shift focus towards the new notification system with the goal of having a working prototype ready for product review by Thursday afternoon."
+  },
+  {
+    title: 'A Walking Guide to the Lake District',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#2d5a27;border-color:#4a8c3f">A Walking Guide to the Lake District</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Route:</span><span class="memo-val">Scafell Pike via Borrowdale — Grade: Strenuous</span></div>
+        <div class="memo-row"><span class="memo-key">Notes:</span><span class="memo-val">Revised edition, ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "The ascent of Scafell Pike via the Borrowdale approach is widely regarded as one of the finest full-day walks in England, rewarding those who make the effort with views that, on a clear day, extend as far as the Isle of Man and the mountains of Snowdonia to the south-west. Begin at the National Trust car park in Seathwaite, the wettest permanently inhabited settlement in England, and follow the well-worn track up through the valley alongside Styhead Gill. The path steepens considerably above Styhead Tarn and the terrain becomes rockier as you gain height, so sturdy footwear and waterproofs are essential regardless of how promising the morning looks from the valley floor. The summit plateau is an otherworldly expanse of fractured grey rock and on windless days the silence up there is quite remarkable, broken only by the distant call of a raven riding the thermals below."
+  },
+  {
+    title: 'Dear James — Resignation Letter',
+    buildHeader: () => `
+      <div class="memo-header" style="line-height:1.9;margin-bottom:18px">
+        <div style="text-align:right;color:#555;margin-bottom:16px">37 Elm Street, Bristol<br>${today}</div>
+        <div style="margin-bottom:4px">James Hartley</div>
+        <div style="margin-bottom:12px;color:#555">Managing Director, Hartley &amp; Webb Consulting</div>
+        <div style="margin-bottom:12px;font-size:16px">Dear James,</div>
+      </div>`,
+    passage: "It is with mixed feelings that I write to formally tender my resignation from my position as Senior Analyst, with my last day being four weeks from the date of this letter in accordance with the terms of my contract. This has been a genuinely difficult decision and not one I have arrived at quickly or without considerable reflection. The time I have spent at Hartley and Webb has shaped my career in ways I could not have anticipated when I joined, and I am grateful for the opportunities you and the wider team have extended to me over the past three years. I have learned an enormous amount in this role and leave with a great deal of respect for the work that the firm does and the people who do it. I am committed to ensuring a thorough and well-documented handover and am happy to assist in whatever way is most useful during the transition period."
+  },
+  {
+    title: 'Spiced Parsnip Soup — Autumn Recipe',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#6b4c11;border-color:#b07d2a">Spiced Parsnip Soup</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Serves:</span><span class="memo-val">6 people &nbsp;·&nbsp; Prep: 15 min &nbsp;·&nbsp; Cook: 35 min</span></div>
+        <div class="memo-row"><span class="memo-key">From:</span><span class="memo-val">Seasonal Kitchen Notes, updated ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "Begin by peeling and roughly chopping the parsnips, then set them aside whilst you soften a large diced onion in a generous knob of butter over a medium heat, taking care not to let it colour too quickly. Add two cloves of garlic and a heaped teaspoon each of ground cumin, coriander, and turmeric, stirring everything together and letting the spices toast gently in the butter for a minute or two until wonderfully fragrant. Tip in the parsnips, pour over a litre of good vegetable stock, and bring the whole lot to a gentle simmer. Cook with the lid partially on for around twenty-five minutes until the parsnips are completely tender when tested with a knife. Remove from the heat and blend until silky smooth, adjusting the consistency with a little more stock if necessary. Season generously with salt and white pepper, finish with a swirl of crème fraiche and a scattering of toasted pumpkin seeds, and serve with thick slices of crusty bread."
+  },
+  {
+    title: 'A History of the British Pub — Draft Chapter',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#3b2a1a;border-color:#7a5230">A History of the British Pub</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key" style="width:100px">Chapter:</span><span class="memo-val">Three — The Victorian Era</span></div>
+        <div class="memo-row"><span class="memo-key" style="width:100px">Draft:</span><span class="memo-val">First draft, ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "The Victorian public house underwent a transformation so dramatic that it amounted to an almost complete reinvention of the institution. Where the Georgian alehouse had been a modest affair, typically no more than a room or two in a private dwelling, the gin palaces of the 1830s and the ornate gin-and-beer shops that followed introduced an architecture of deliberate spectacle. Etched glass partitions, polished mahogany counters, elaborate plasterwork ceilings, and the warm amber glow of gas lamps created interiors that offered working-class Victorians a degree of comfort and visual splendour wholly absent from their domestic lives. The social function of the pub expanded accordingly, becoming not merely a place to drink but a venue for trade meetings, political organising, musical entertainment, and the informal exchange of news in an age before wireless or universal literacy."
+  },
+  {
+    title: 'Weekend in Edinburgh — Travel Diary',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#1a2e4a;border-color:#2e5080">Weekend in Edinburgh</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Dates:</span><span class="memo-val">Three nights, personal travel diary</span></div>
+        <div class="memo-row"><span class="memo-key">Written:</span><span class="memo-val">${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "Edinburgh announces itself from the train long before you arrive, the castle rock rising suddenly from the flat coastal plain to the east like something from a storybook, its silhouette unchanged in any essential way since the medieval period. We arrived on a Friday evening and walked directly up from Waverley station through the Old Town, joining the thin crowds on the Royal Mile where the last of the day's tourists were still making their way down towards Holyrood. The city has a quality of compressed drama about it that very few places in Britain can match, every close and wynd opening onto something unexpected, every turn offering a sudden framed view of the Firth or the Pentland Hills. We ate exceptionally well, drank very late in a basement bar on Rose Street, and spent Saturday morning recovering slowly over coffee and pastries in a quietly wonderful café on Broughton Street."
+  },
+  {
+    title: 'Allotment Diary — Late October',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#2e5e1e;border-color:#4a8a2a">Allotment Diary</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Plot:</span><span class="memo-val">Number 14, Marlborough Road Allotments</span></div>
+        <div class="memo-row"><span class="memo-key">Entry:</span><span class="memo-val">Late October, written ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "The first proper frost of autumn arrived overnight on Thursday, and by the time I reached the plot at half past eight on Friday morning the whole site was white and still and rather beautiful in a melancholy way. The courgette plants, which had been struggling gamely on for weeks beyond their natural season, finally gave up and collapsed into a limp heap of blackened leaves which I cleared away and took to the compost bin at the far end. The leeks are looking magnificent, standing to attention in their row like small soldiers, and the purple sprouting broccoli that I planted back in June is beginning to show promising signs of side shoots. I lifted the last of the maincrop potatoes before the frost could do any damage, a satisfying haul of large floury specimens that should see us comfortably through until Christmas if stored carefully in paper sacks in the shed."
+  },
+  {
+    title: 'Business Proposal — New Office Premises',
+    buildHeader: () => `
+      <div class="memo-title">Business Proposal</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">To:</span><span class="memo-val">Board of Directors</span></div>
+        <div class="memo-row"><span class="memo-key">From:</span><span class="memo-val">Operations &amp; Facilities Committee</span></div>
+        <div class="memo-row"><span class="memo-key">Date:</span><span class="memo-val">${today}</span></div>
+        <div class="memo-row"><span class="memo-key">Re:</span><span class="memo-val">Proposed Relocation to New Office Premises, Central Manchester</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "This proposal sets out the case for relocating our head office from the current premises on Deansgate to a purpose-fitted floor of the newly developed Exchange Quarter building, which would provide significantly improved working conditions for staff alongside material savings on occupancy costs over the medium term. The current lease expires in nine months and represents an opportune moment to review whether our existing space continues to serve the organisation well as it grows and as ways of working continue to evolve. The proposed new premises offer forty per cent more usable desk space, dedicated client meeting suites, improved accessibility throughout, and a substantially better transport connection for the majority of our staff. We have obtained a competitive indicative quotation from the developer and are satisfied that the total cost of relocation, including fit-out and the period of double-running costs, can be accommodated within the capital budget already approved for the current financial year."
+  },
+  {
+    title: 'Dear Grandma — Thank You Letter',
+    buildHeader: () => `
+      <div class="memo-header" style="line-height:1.9;margin-bottom:18px">
+        <div style="text-align:right;color:#555;margin-bottom:16px">9 Hawthorn Close, Cambridge<br>${today}</div>
+        <div style="margin-bottom:12px;font-size:16px">Dear Grandma,</div>
+      </div>`,
+    passage: "Thank you so much for having us all to stay last weekend. It was absolutely lovely to see you and it meant a great deal to everyone, particularly the children who are still talking about the walk by the river and the fact that you let them have a second helping of pudding. The house felt just as warm and welcoming as it always has and I think we all needed a quiet weekend away from the noise of the city more than we quite realised until we got there. The lamb was delicious and I would be very grateful for the recipe if you are happy to share it, as I have attempted something similar several times without ever quite getting the seasoning right. We are hoping to come again at Christmas if that suits you, and I promise we will give you considerably more notice next time rather than ringing up on a Tuesday with the fairly unreasonable suggestion of arriving on Friday."
+  },
+  {
+    title: 'The Midnight Garden — Chapter 12',
+    buildHeader: () => `
+      <div class="memo-title" style="font-style:italic;color:#1a1a2e;border-color:#4a4a7a">The Midnight Garden</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key" style="width:100px">Chapter:</span><span class="memo-val">Twelve — What the Gardener Knew</span></div>
+        <div class="memo-row"><span class="memo-key" style="width:100px">Draft:</span><span class="memo-val">Third revision, ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "The old gardener was already at work when Daniel came down the back steps in the grey pre-dawn light, moving between the beds with the unhurried certainty of a man who has spent so many years in a garden that he no longer needs to think about where anything is. He did not look up at the sound of the door, though Daniel was sure he must have heard it, but continued his methodical progress along the row of runner beans, checking each plant with his fingertips in the way you might check the pulse of something sleeping. Daniel stood watching for a moment, his breath clouding in the cold air, before the old man finally straightened and turned and regarded him with an expression that suggested he had been expecting this visit for considerably longer than Daniel had been planning to make it."
+  },
+  {
+    title: 'HR Policy Update — Hybrid Working',
+    buildHeader: () => `
+      <div class="memo-title">HR Policy Update</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">To:</span><span class="memo-val">All Staff</span></div>
+        <div class="memo-row"><span class="memo-key">From:</span><span class="memo-val">Human Resources Department</span></div>
+        <div class="memo-row"><span class="memo-key">Date:</span><span class="memo-val">${today}</span></div>
+        <div class="memo-row"><span class="memo-key">Re:</span><span class="memo-val">Updated Hybrid Working Policy — Effective Immediately</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "Following an extended period of consultation with staff representatives, trade union colleagues, and senior leadership, we are pleased to share the updated hybrid working policy which comes into effect immediately and supersedes all previous guidance issued on this subject. The new policy entitles all permanent employees to work remotely for up to three days per week, with a minimum of two days spent in the office, subject to the operational requirements of their team and the discretion of their line manager. We recognise that individual circumstances vary considerably and the policy is designed to be applied with common sense and proportionality rather than enforced rigidly in a way that does not serve the interests of either the organisation or its people. Managers are asked to hold a brief conversation with each member of their team within the next fortnight to agree a working pattern that reflects both individual preferences and business needs, and to record the outcome in the HR system."
+  }
+,
+
+  // ── EASY ──
+  {
+    title: 'Note to Self — Monday Morning',
+    buildHeader: () => `
+      <div class="memo-header" style="line-height:1.9;margin-bottom:18px">
+        <div style="text-align:right;color:#555;margin-bottom:16px">${today}</div>
+        <div style="margin-bottom:12px;font-size:16px;font-weight:600">Note to Self</div>
+      </div>`,
+    passage: "Get up on time. Make the bed. Put the kettle on and let it boil while you wash your face and find a clean shirt. Eat a proper breakfast, not just a biscuit and a cup of tea on the way out the door. Leave the house by half past eight at the very latest. Be kind to the man at the bus stop. Do not check your phone on the bus. When you get to the desk, write down the three things you need to do today and do them in order. Do not start the second one until the first is done. Take a real break at lunch, away from the screen. Drink more water. At the end of the day, tidy the desk before you leave so that tomorrow morning feels like a fresh start rather than a mess you already made."
+  },
+  {
+    title: 'Shopping Notes — This Week',
+    buildHeader: () => `
+      <div class="memo-header" style="line-height:1.9;margin-bottom:18px">
+        <div style="text-align:right;color:#555;margin-bottom:16px">${today}</div>
+        <div style="margin-bottom:12px;font-size:16px;font-weight:600">Weekly Shop — Notes</div>
+      </div>`,
+    passage: "We are out of milk, bread, eggs, and butter so those need to come first. Pick up some cheese while you are at it, the hard kind that keeps well in the fridge. We need more tea bags and a new jar of coffee. Get some fresh fruit, whatever looks good, and a bag of apples for the week. Grab a few tins of soup for the days when no one feels like cooking. We are nearly out of washing-up liquid and there is no more loo roll so do not forget those. If the bakery is open, get a loaf of the seeded bread. Check if we need more olive oil before you go, as I think the bottle is almost empty. Try not to buy too many things we do not need just because they are on offer."
+  },
+  {
+    title: 'Dear Tom — Catch Up Note',
+    buildHeader: () => `
+      <div class="memo-header" style="line-height:1.9;margin-bottom:18px">
+        <div style="text-align:right;color:#555;margin-bottom:16px">8 Park Road, York<br>${today}</div>
+        <div style="margin-bottom:12px;font-size:16px">Dear Tom,</div>
+      </div>`,
+    passage: "Just a quick note to say hello and to check that you are all doing well up there. It has been too long since we last spoke and I keep meaning to ring but the weeks seem to fly by before I get round to it. We are all fine here. The kids are back at school and seem to be getting on well, which is a relief after last term. The dog had a bad week but is much better now and back to her old self, which is good news for everyone. Work is busy but I am not going to moan about that. I was thinking we could try to meet up some time next month if you have a free weekend. It would be nice to have a proper catch up over a meal rather than a rushed chat on the phone. Let me know what works for you and we will sort something out."
+  },
+  {
+    title: 'Sunday Walk — Field Notes',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#2e5e1e;border-color:#4a8a2a">Sunday Walk — Field Notes</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Date:</span><span class="memo-val">${today}</span></div>
+        <div class="memo-row"><span class="memo-key">Route:</span><span class="memo-val">Village loop, approx. four miles</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "We set off just after nine while the air was still cold and the fields were wet with dew. The path out of the village runs past the old mill and then up a gentle slope to the top of the ridge where on a clear day you can see for miles in every direction. It was a grey sort of morning but not unpleasant, and there were very few other people about, which was nice. We saw a fox at the edge of the wood, just standing there looking at us, before it turned and slipped into the trees without any great hurry. The mud on the back path was bad and we both got our boots properly dirty, but that is what boots are for. We were home by midday, made a pot of soup, and felt very glad we had gone out rather than staying in watching television all morning."
+  },
+
+  // ── MEDIUM ──
+  {
+    title: 'Project Debrief — Spring Campaign',
+    buildHeader: () => `
+      <div class="memo-title">Project Debrief</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Project:</span><span class="memo-val">Spring Brand Campaign 2025</span></div>
+        <div class="memo-row"><span class="memo-key">Date:</span><span class="memo-val">${today}</span></div>
+        <div class="memo-row"><span class="memo-key">Author:</span><span class="memo-val">Marketing &amp; Creative Team</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "The spring campaign delivered results broadly in line with our initial projections, though performance varied considerably across channels and audience segments in ways that offer useful lessons for future planning. Paid social drove the highest volume of traffic to the landing page but converted at a lower rate than anticipated, suggesting that the creative assets were effective at generating interest without successfully communicating the core value proposition clearly enough to prompt action. Email performed well above expectations in terms of open and click-through rates, which we attribute largely to the improved segmentation work carried out in the weeks before launch. The outdoor placements in the four trial cities generated strong brand recall scores in the post-campaign research, though as expected we were unable to tie this directly to measurable commercial outcomes in the short term."
+  },
+  {
+    title: 'Book Club Notes — October Meeting',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#3b2a1a;border-color:#7a5230">Book Club Notes</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Book:</span><span class="memo-val">The Remains of the Day — Kazuo Ishiguro</span></div>
+        <div class="memo-row"><span class="memo-key">Meeting:</span><span class="memo-val">October, notes written ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "The group was largely in agreement that this is one of the finest English novels of the past fifty years, though the discussion quickly became lively when we turned to the question of whether Stevens is a figure of tragedy or of quiet dignity, or whether those two readings are in fact the same thing approached from different angles. Several members found his emotional repression deeply frustrating to read, while others felt that Ishiguro presents it with such precision and such sympathy that frustration gives way to something closer to grief by the end. The novel's treatment of regret was the passage that generated the most discussion, particularly the scene in the car with Miss Kenton where Stevens comprehends, or half-comprehends, what his choices have cost him."
+  },
+  {
+    title: 'Flat Viewing Notes — Saturday',
+    buildHeader: () => `
+      <div class="memo-header" style="line-height:1.9;margin-bottom:18px">
+        <div style="text-align:right;color:#555;margin-bottom:16px">${today}</div>
+        <div style="margin-bottom:12px;font-size:16px;font-weight:600">Flat Viewings — Notes &amp; Impressions</div>
+      </div>`,
+    passage: "The first flat on Cavendish Road was smaller than the photos suggested, which is always a bad sign, and the bedroom looked directly onto the brick wall of the building next door with barely three feet of gap between the two. The kitchen had been recently renovated but in a rather cheap way that would become irritating to live with after a few months. Not worth a second viewing. The second flat on Marlborough Street was much more promising. The rooms were a good size, the light was excellent from about midday onwards, and the landlord seemed sensible and unhurried in a way that suggested he would not be difficult to deal with. The street is noisier than we would like but the double glazing appeared to do a reasonable job. We are going back to look at Marlborough Street again on Thursday."
+  },
+  {
+    title: 'Weekend Plans — Group Email',
+    buildHeader: () => `
+      <div class="memo-header" style="line-height:1.9;margin-bottom:18px">
+        <div style="text-align:right;color:#555;margin-bottom:16px">${today}</div>
+        <div style="margin-bottom:4px">Hi everyone,</div>
+      </div>`,
+    passage: "I wanted to get something in the diary before everyone disappears off for the half term so here is a rough plan for the weekend of the fourteenth. The idea is to hire a couple of large houses in the countryside, somewhere within two hours of London so nobody has to drive all day, and spend Saturday and Sunday properly catching up without anyone having to rush off. We are thinking around twenty people all in, so if you are keen please let me know by the end of this week so I can start looking at places with the right number of beds. Cost should be reasonable if we split it properly, probably somewhere between forty and sixty pounds a head for the two nights. Bring your own drinks and we will sort food communally. Partners and children are very welcome."
+  },
+
+  // ── HARD ──
+  {
+    title: 'Constitutional Law — Lecture Notes',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#1a2e4a;border-color:#2e5080">Constitutional Law</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Module:</span><span class="memo-val">LW3042 — Constitutional and Administrative Law</span></div>
+        <div class="memo-row"><span class="memo-key">Notes:</span><span class="memo-val">Lecture 7, transcribed ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "The doctrine of parliamentary sovereignty, as articulated most influentially by Dicey in his Introduction to the Study of the Law of the Constitution, holds that Parliament possesses the right to make or unmake any law whatsoever, and that no person or body is recognised by English law as having the right to override or set aside the legislation of Parliament. This formulation, whilst analytically elegant, has attracted substantial criticism from constitutional theorists who argue that it fails to account adequately for the practical constraints on parliamentary action that arise from membership of supranational organisations, from constitutional conventions, and from the judiciary's increasingly assertive approach to statutory interpretation. The relationship between parliamentary sovereignty and the rule of law has become particularly contested in recent decades, with judgments such as Jackson v Attorney General suggesting that the courts are prepared to scrutinise the exercise of parliamentary and executive power with a rigour that Dicey's framework did not anticipate."
+  },
+  {
+    title: 'Clinical Research Summary',
+    buildHeader: () => `
+      <div class="memo-title">Clinical Research Summary</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Study:</span><span class="memo-val">Phase II Efficacy and Tolerability Assessment</span></div>
+        <div class="memo-row"><span class="memo-key">Prepared:</span><span class="memo-val">${today}</span></div>
+        <div class="memo-row"><span class="memo-key">Status:</span><span class="memo-val">Confidential — Internal Distribution Only</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "The phase two trial enrolled two hundred and forty-seven participants across six investigational sites, randomised in a two-to-one ratio to receive either the investigational compound at the proposed therapeutic dose or matched placebo over a twenty-four week treatment period. The primary endpoint of statistically significant improvement in the composite symptom severity score at week twelve was achieved, with the treatment group demonstrating a mean reduction of thirty-one per cent compared to eight per cent in the placebo cohort, a difference that reached statistical significance with a p-value of less than zero point zero one. Tolerability was broadly acceptable, with the most frequently reported treatment-emergent adverse events being transient gastrointestinal disturbance and mild headache, both of which resolved without intervention in the majority of cases and did not result in discontinuation."
+  },
+  {
+    title: 'Architecture Critique — Southwark Riverside',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#2c2c2c;border-color:#888">Architecture &amp; Planning Review</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key">Subject:</span><span class="memo-val">Proposed Mixed-Use Development, Southwark Riverside</span></div>
+        <div class="memo-row"><span class="memo-key">Reviewer:</span><span class="memo-val">Urban Design Advisory Panel, ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "The proposed development presents an architectural language that oscillates uncomfortably between contextual deference and wilful self-assertion, never fully committing to either with sufficient conviction to make the resulting synthesis persuasive. The facade treatment on the principal elevation borrows its materiality from the Victorian warehouses that once characterised this stretch of the riverfront without demonstrating any genuine understanding of the structural and compositional logic that gave those buildings their coherence, producing instead a pastiche that neither satisfies historically informed observers nor offers the clarity and rigour that contemporary design at this scale demands. The massing strategy fares rather better, and the decision to step the building down towards the water's edge shows a sensitivity to the public realm that is commendably absent from much comparable riverside development elsewhere in the capital."
+  },
+  {
+    title: 'Philosophy Essay — Free Will',
+    buildHeader: () => `
+      <div class="memo-title" style="font-style:italic;color:#2c2c2c;border-color:#888">Free Will and Moral Responsibility</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key" style="width:110px">Module:</span><span class="memo-val">PH2210 — Metaphysics and Epistemology</span></div>
+        <div class="memo-row"><span class="memo-key" style="width:110px">Draft:</span><span class="memo-val">First draft, ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "The compatibilist position, defended in various forms by Hume, Mill, and more recently by Frankfurt and Dennett, holds that free will and determinism are not merely logically consistent but that a proper understanding of what we mean by freedom actually requires a deterministic backdrop against which genuinely voluntary action can be distinguished from compulsion, coercion, and mere reflex. The hard incompatibilist, by contrast, argues that if every mental event is the inevitable product of prior causes extending back beyond the agent's birth and beyond any possible sphere of self-determination, then the notion of genuine authorship over one's actions is incoherent and the practices of praise, blame, and punishment that we build upon it require thoroughgoing revision. Frankfurt's influential thought experiment involving alternative possibilities attempts to sever the link between moral responsibility and the ability to have done otherwise, but critics have argued persuasively that every variant of the case either fails to eliminate genuine alternatives or tacitly reintroduces the very causal structures it was designed to exclude."
+  },
+  {
+    title: 'Victorian Poetry — Critical Analysis',
+    buildHeader: () => `
+      <div class="memo-title" style="color:#3b2a1a;border-color:#7a5230">Victorian Poetry — Critical Analysis</div>
+      <div class="memo-header">
+        <div class="memo-row"><span class="memo-key" style="width:110px">Module:</span><span class="memo-val">EN2340 — Victorian Literature and Culture</span></div>
+        <div class="memo-row"><span class="memo-key" style="width:110px">Draft:</span><span class="memo-val">Second essay draft, ${today}</span></div>
+      </div><hr class="doc-divider">`,
+    passage: "Tennyson's In Memoriam A.H.H. occupies an unusual position in the Victorian literary landscape as a text that simultaneously enacts and interrogates the elegiac tradition it inherits, deploying the consolatory machinery of classical elegy while subjecting its own consolations to a sceptical pressure that neither the form nor the ideology of the period had previously been asked to bear. The poem's extraordinary length, its accumulation of lyrics rather than its progression towards resolution, enacts at the formal level the very resistance to closure that its speaker experiences at the psychological and theological level. The geological and evolutionary anxieties that surface throughout the poem have attracted considerable critical attention, and rightly so, but it would be reductive to read In Memoriam primarily as a document of Victorian crisis of faith rather than as a sustained meditation on the phenomenology of grief, which the poem represents with a fidelity and complexity that remains remarkable."
+  }
+];
+
+let passage='', spans=[], idx=0;
+let started=false, finished=false;
+let timerInt=null, timeLeft=60;
+let errors=0, totalTyped=0;
+let correctChars=0; // for accurate WPM
+
+function initTest() {
+  clearInterval(timerInt);
+  started=false; finished=false;
+  idx=0; errors=0; totalTyped=0; correctChars=0; timeLeft=60;
+
+  const theme = THEMES[Math.floor(Math.random()*THEMES.length)];
+  passage = theme.passage;
+
+  // Update document title in tab + title bar
+  document.title = theme.title + ' — Word';
+  document.querySelector('.tb-title').innerHTML = theme.title + ' — <span>Word</span>';
+
+  // Update header
+  document.getElementById('docHeader').innerHTML = theme.buildHeader();
+
+  // Build character spans
+  const area = document.getElementById('typingArea');
+  // Keep the caret element, clear everything else
+  const caret = document.getElementById('caret');
+  area.innerHTML = '';
+  area.appendChild(caret);
+  spans = [];
+
+  for (let i=0; i<passage.length; i++) {
+    const s = document.createElement('span');
+    s.className = 'ch ghost';
+    s.textContent = passage[i];
+    area.appendChild(s);
+    spans.push(s);
+  }
+
+  document.getElementById('modalBg').classList.remove('show');
+  updateStatusBar();
+
+  // Position caret at first char after a paint
+  requestAnimationFrame(() => { moveCaret(); });
+  focusInp();
+}
+
+function focusInp(){ document.getElementById('inp').focus(); }
+document.getElementById('page').addEventListener('click', focusInp);
+
+// ── Floating caret — uses offset positions (scroll-stable) ──
+const caretEl = document.getElementById('caret');
+function moveCaret() {
+  if (!spans[idx]) { caretEl.style.display='none'; return; }
+  const s = spans[idx];
+  caretEl.style.display = 'block';
+  caretEl.style.left   = s.offsetLeft + 'px';
+  caretEl.style.top    = s.offsetTop  + 'px';
+  caretEl.style.height = s.offsetHeight + 'px';
+}
+
+function startTimer(){
+  started=true;
+  timerInt = setInterval(()=>{
+    timeLeft--;
+    updateStatusBar();
+    if(timeLeft<=0) endTest();
+  },1000);
+}
+
+// Standard WPM = (correct characters / 5) / minutes elapsed
+function calcWPM(elapsed) {
+  return Math.round((correctChars / 5) / (elapsed / 60));
+}
+
+function updateStatusBar(){
+  const elapsed = Math.max(1, 60 - timeLeft);
+  const wpm = calcWPM(elapsed);
+  const acc = totalTyped ? Math.max(0, Math.round((correctChars / totalTyped) * 100)) : 100;
+  const wordCount = passage.substring(0,idx).trim().split(/\s+/).filter(Boolean).length;
+
+  document.getElementById('st-words').textContent = 'Words: ' + wordCount;
+  document.getElementById('st-wpm').textContent  = 'WPM: ' + (started ? wpm : '—');
+  document.getElementById('st-acc').textContent  = 'Acc: ' + (started ? acc+'%' : '—');
+  document.getElementById('st-time').textContent = '⏱ ' + timeLeft + 's';
+}
+
+function endTest(){
+  clearInterval(timerInt);
+  finished=true;
+  caretEl.style.display='none';
+
+  const elapsed = 60;
+  const wpm = calcWPM(elapsed);
+  const acc = totalTyped ? Math.max(0, Math.round((correctChars / totalTyped) * 100)) : 100;
+  const wordCount = passage.substring(0,idx).trim().split(/\s+/).filter(Boolean).length;
+
+  document.getElementById('modalGrid').innerHTML = `
+    <div class="m-card"><div class="m-val">${wpm}</div><div class="m-lbl">Words per Minute</div></div>
+    <div class="m-card"><div class="m-val">${acc}%</div><div class="m-lbl">Accuracy</div></div>
+    <div class="m-card"><div class="m-val">${wordCount}</div><div class="m-lbl">Words Typed</div></div>
+    <div class="m-card"><div class="m-val">${correctChars}</div><div class="m-lbl">Correct Characters</div></div>
+  `;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+function scrollToCaret(){
+  if(!spans[idx]) return;
+  const scroll = document.getElementById('docScroll');
+  const scrollRect = scroll.getBoundingClientRect();
+  const spanRect = spans[idx].getBoundingClientRect();
+  // If caret is in the bottom 30% of the scroll area, scroll down a line
+  if(spanRect.bottom > scrollRect.bottom - scrollRect.height * 0.25){
+    const lineH = spanRect.height * 1.55;
+    scroll.scrollBy({top: lineH, behavior: 'smooth'});
+  }
+}
+
+const inp = document.getElementById('inp');
+
+inp.addEventListener('keydown', e=>{
+  if(finished) return;
+
+  if(e.key==='Backspace'){
+    e.preventDefault();
+    if(idx>0){
+      // undo last char
+      if(spans[idx-1].classList.contains('done')) correctChars--;
+      else errors = Math.max(0, errors-1);
+      totalTyped = Math.max(0, totalTyped-1);
+      spans[idx-1].className = 'ch ghost';
+      idx--;
+      moveCaret();
+      updateStatusBar();
+    }
+    return;
+  }
+
+  if(e.ctrlKey||e.metaKey||e.altKey||e.key.length!==1) return;
+  e.preventDefault();
+
+  if(!started) startTimer();
+  if(idx>=passage.length){ endTest(); return; }
+
+  const ok = e.key===passage[idx];
+  totalTyped++;
+  if(ok) correctChars++; else errors++;
+
+  spans[idx].className = 'ch ' + (ok ? 'done' : 'err');
+  idx++;
+
+  moveCaret();
+  scrollToCaret();
+  updateStatusBar();
+});
+
+document.addEventListener('keydown', ()=>{ if(!finished) inp.focus(); });
+inp.addEventListener('blur', ()=>{ if(!finished) setTimeout(()=>inp.focus(),30); });
+
+initTest();
+</script>
+</body>
+</html>

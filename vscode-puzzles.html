@@ -1,0 +1,2344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>project-alpha — Visual Studio Code</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#1e1e1e;--sidebar:#252526;--actbar:#333333;--titlebar:#3c3c3c;
+  --tab-bg:#2d2d2d;--tab-active:#1e1e1e;--tab-border:#252526;
+  --panel:#1e1e1e;--panel-header:#252526;--border:#474747;
+  --statusbar:#007acc;--statusbar-dbg:#cc6633;
+  --gutter:#858585;--gutter-active:#c6c6c6;--gutter-bg:#1e1e1e;
+  --hl-line:#282828;--hl-bug:#3a1f1f;
+  --kw:#569cd6;--str:#ce9178;--num:#b5cea8;--cmt:#6a9955;
+  --fn:#dcdcaa;--type:#4ec9b0;--var:#9cdcfe;--plain:#d4d4d4;
+  --bug:#f44747;--bug-bg:rgba(244,71,71,0.15);--punct:#d4d4d4;
+  --scrollbar:#424242;--minimap:#1a1a1a;
+}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;background:var(--bg);color:var(--plain);}
+
+/* ── TITLE BAR ── */
+.titlebar{
+  height:30px;background:var(--titlebar);display:flex;align-items:center;
+  -webkit-app-region:drag;flex-shrink:0;position:relative;
+}
+.tb-dots{display:flex;gap:8px;padding:0 16px;align-items:center;}
+.tb-dot{width:12px;height:12px;border-radius:50%;cursor:pointer;}
+.tb-dot.r{background:#ff5f57;}.tb-dot.y{background:#febc2e;}.tb-dot.g{background:#28c840;}
+.tb-menu{display:flex;gap:2px;padding:0 8px;}
+.tb-mi{padding:0 8px;height:30px;display:flex;align-items:center;font-size:12px;color:rgba(255,255,255,0.75);cursor:pointer;}
+.tb-mi:hover{background:rgba(255,255,255,0.1);}
+.tb-title{position:absolute;left:50%;transform:translateX(-50%);font-size:12px;color:rgba(255,255,255,0.7);white-space:nowrap;pointer-events:none;}
+.tb-title b{color:rgba(255,255,255,0.9);}
+.tb-win{margin-left:auto;display:flex;}
+.tb-wb{width:46px;height:30px;display:flex;align-items:center;justify-content:center;font-size:10px;color:rgba(255,255,255,0.6);cursor:pointer;}
+.tb-wb:hover{background:rgba(255,255,255,0.1);}
+.tb-wb.close:hover{background:#e81123;color:white;}
+
+/* ── LAYOUT ── */
+.body{display:flex;flex:1;height:calc(100vh - 30px);}
+
+/* ── ACTIVITY BAR ── */
+.actbar{
+  width:48px;background:var(--actbar);display:flex;flex-direction:column;
+  align-items:center;padding:4px 0;gap:2px;flex-shrink:0;border-right:1px solid rgba(0,0,0,0.3);
+}
+.ab-icon{
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;opacity:0.6;border-radius:6px;position:relative;
+  border-left:2px solid transparent;color:rgba(255,255,255,0.85);
+}
+.ab-icon svg{width:22px;height:22px;flex-shrink:0;}
+.ab-icon:hover{opacity:0.9;background:rgba(255,255,255,0.06);}
+.ab-icon.active{opacity:1;border-left-color:#fff;}
+.ab-bottom{margin-top:auto;}
+.ab-badge{
+  position:absolute;top:4px;right:4px;background:#cc6633;color:white;
+  font-size:8px;font-weight:700;min-width:14px;height:14px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;padding:0 2px;
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:220px;background:var(--sidebar);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;
+}
+.sb-title{
+  padding:10px 12px 6px;font-size:11px;font-weight:700;letter-spacing:0.08em;
+  text-transform:uppercase;color:rgba(255,255,255,0.5);flex-shrink:0;
+}
+.sb-tree{flex:1;overflow-y:auto;font-size:13px;}
+.sb-tree::-webkit-scrollbar{width:6px;}
+.sb-tree::-webkit-scrollbar-thumb{background:var(--scrollbar);}
+.sb-folder{
+  padding:2px 8px 2px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;
+  color:rgba(255,255,255,0.85);
+}
+.sb-folder:hover{background:rgba(255,255,255,0.06);}
+.sb-file{
+  padding:2px 8px 2px 30px;cursor:pointer;display:flex;align-items:center;
+  gap:6px;color:rgba(255,255,255,0.7);font-size:12px;
+}
+.sb-file:hover{background:rgba(255,255,255,0.06);}
+.sb-file.active{background:rgba(255,255,255,0.1);color:#fff;}
+.sb-err{margin-left:auto;color:#f44747;font-size:11px;}
+.sb-ok{margin-left:auto;color:#4ec9b0;font-size:11px;}
+.sb-icon{width:16px;height:16px;display:flex;align-items:center;flex-shrink:0;}
+
+/* ── EDITOR CONTAINER ── */
+.editor-container{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+
+/* ── TABS ── */
+.tabs{
+  height:35px;background:var(--tab-bg);display:flex;align-items:flex-end;
+  border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;
+}
+.tabs::-webkit-scrollbar{height:3px;}
+.tabs::-webkit-scrollbar-thumb{background:var(--scrollbar);}
+.tab{
+  height:35px;padding:0 20px 0 14px;display:flex;align-items:center;gap:8px;
+  cursor:pointer;border-right:1px solid var(--border);white-space:nowrap;
+  font-size:13px;color:rgba(255,255,255,0.5);background:var(--tab-bg);
+  position:relative;flex-shrink:0;
+}
+.tab.active{background:var(--tab-active);color:#fff;border-top:1px solid var(--statusbar);}
+.tab .tab-close{opacity:0;font-size:14px;margin-left:4px;line-height:1;}
+.tab:hover .tab-close{opacity:0.6;}
+.tab .tab-err{color:#f44747;font-size:14px;}
+.tab .tab-ok{color:#4ec9b0;font-size:14px;}
+.tab-lang-icon{display:flex;align-items:center;}
+
+/* ── EDITOR ── */
+.editor-wrap{flex:1;display:flex;overflow:hidden;}
+.editor{
+  flex:1;overflow:auto;position:relative;padding:8px 0;
+  font-family:'Cascadia Code','Fira Code','Consolas','Courier New',monospace;
+  font-size:14px;line-height:22px;
+}
+.editor::-webkit-scrollbar{width:10px;height:10px;}
+.editor::-webkit-scrollbar-track{background:#1e1e1e;}
+.editor::-webkit-scrollbar-thumb{background:#424242;}
+
+.code-lines{padding-right:60px;}
+
+.code-line{
+  display:flex;min-height:22px;
+  padding-right:20px;
+}
+.code-line:hover{background:rgba(255,255,255,0.03);}
+.code-line.bug-line{background:var(--hl-bug);}
+.code-line.active-line{background:var(--hl-line);}
+
+.ln{
+  width:50px;min-width:50px;text-align:right;padding-right:16px;
+  color:var(--gutter);font-size:13px;user-select:none;flex-shrink:0;line-height:22px;
+}
+.code-line.active-line .ln,.code-line.bug-line .ln{color:var(--gutter-active);}
+
+.lc{flex:1;white-space:pre;line-height:22px;}
+
+/* Syntax colors */
+.kw{color:var(--kw);}
+.str{color:var(--str);}
+.num{color:var(--num);}
+.cmt{color:var(--cmt);font-style:italic;}
+.fn{color:var(--fn);}
+.type{color:var(--type);}
+.vr{color:var(--var);}
+.pl{color:var(--plain);}
+.op{color:#d4d4d4;}
+.pu{color:#d4d4d4;}
+
+/* Bug value */
+.bug-val{
+  color:var(--bug);
+  text-decoration:underline;text-decoration-style:wavy;
+  text-decoration-color:var(--bug);
+  background:var(--bug-bg);border-radius:2px;padding:0 1px;
+  cursor:pointer;position:relative;
+}
+.bug-val:hover{background:rgba(244,71,71,0.25);}
+.bug-val::after{
+  content:'click to fix';position:absolute;bottom:calc(100% + 4px);left:50%;
+  transform:translateX(-50%);background:#252526;color:#ccc;
+  font-size:10px;padding:3px 7px;border-radius:3px;white-space:nowrap;
+  pointer-events:none;opacity:0;transition:opacity 0.15s;
+  border:1px solid #555;font-family:'Segoe UI',sans-serif;
+}
+.bug-val:hover::after{opacity:1;}
+
+/* Inline fix input */
+.fix-input{
+  background:#0d2137;border:1px solid var(--statusbar);
+  color:#9cdcfe;font-family:'Cascadia Code','Fira Code','Consolas',monospace;
+  font-size:14px;outline:none;border-radius:2px;padding:0 3px;
+  min-width:60px;line-height:20px;vertical-align:middle;
+  box-shadow:0 0 0 1px rgba(0,122,204,0.3);
+}
+
+/* Squiggle under bug line */
+.squig{
+  border-bottom:2px solid var(--bug);
+  display:inline;
+}
+
+/* ── MINIMAP ── */
+.minimap{
+  width:80px;background:var(--minimap);border-left:1px solid rgba(0,0,0,0.2);
+  overflow:hidden;position:relative;flex-shrink:0;
+}
+.minimap-viewport{
+  position:absolute;top:0;left:0;right:0;height:40px;
+  background:rgba(255,255,255,0.07);pointer-events:none;
+}
+.mini-lines{padding:4px 6px;}
+.mini-ln{height:2px;margin:1px 0;border-radius:1px;background:rgba(255,255,255,0.08);}
+.mini-ln.cmt-mini{background:rgba(106,153,85,0.4);}
+.mini-ln.bug-mini{background:rgba(244,71,71,0.5);height:3px;}
+.mini-ln.code-mini{background:rgba(255,255,255,0.12);}
+
+/* ── PANEL (terminal / problems) ── */
+.panel{
+  height:200px;background:var(--panel);border-top:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;
+}
+.panel-tabs{
+  height:36px;background:var(--panel-header);display:flex;align-items:center;
+  border-bottom:1px solid var(--border);padding:0 8px;gap:2px;flex-shrink:0;
+}
+.panel-tab{
+  padding:6px 14px;font-size:12px;color:rgba(255,255,255,0.5);
+  cursor:pointer;border-bottom:1px solid transparent;
+}
+.panel-tab.active{color:#fff;border-bottom-color:var(--statusbar);}
+.panel-tab:hover:not(.active){color:rgba(255,255,255,0.75);}
+.panel-actions{margin-left:auto;display:flex;gap:4px;}
+.pa-btn{
+  padding:2px 8px;font-size:11px;color:rgba(255,255,255,0.5);
+  cursor:pointer;border-radius:3px;
+}
+.pa-btn:hover{background:rgba(255,255,255,0.1);color:#fff;}
+
+.panel-body{flex:1;overflow-y:auto;padding:8px 12px;
+  font-family:'Cascadia Code','Consolas',monospace;font-size:12px;line-height:1.7;}
+.panel-body::-webkit-scrollbar{width:6px;}
+.panel-body::-webkit-scrollbar-thumb{background:var(--scrollbar);}
+
+/* Problems panel */
+.prob-item{
+  display:flex;align-items:flex-start;gap:10px;padding:4px 0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.prob-icon{color:#f44747;flex-shrink:0;margin-top:1px;}
+.prob-msg{color:#d4d4d4;font-size:12px;flex:1;}
+.prob-loc{color:#858585;font-size:11px;margin-top:2px;}
+.prob-hint{color:#6a9955;font-size:11px;margin-top:2px;font-style:italic;}
+
+/* Terminal panel */
+.term-line{color:#cccccc;white-space:pre-wrap;font-size:12px;}
+.term-prompt{color:#4ec9b0;}
+.term-pass{color:#4ec9b0;}
+.term-fail{color:#f44747;}
+.term-dim{color:#858585;}
+.term-score{color:#dcdcaa;}
+
+/* ── STATUS BAR ── */
+.statusbar{
+  height:22px;background:var(--statusbar);display:flex;align-items:center;
+  font-size:12px;color:rgba(255,255,255,0.9);flex-shrink:0;
+}
+.statusbar.debugging{background:var(--statusbar-dbg);}
+.sb-item{
+  padding:0 10px;height:22px;display:flex;align-items:center;gap:4px;
+  cursor:pointer;white-space:nowrap;
+}
+.sb-item:hover{background:rgba(255,255,255,0.15);}
+.sb-right{margin-left:auto;display:flex;}
+.sb-err-count{color:white;display:flex;align-items:center;gap:3px;}
+
+/* ── SCORE OVERLAY ── */
+.score-bar{
+  position:absolute;top:8px;right:100px;z-index:10;
+  background:#252526;border:1px solid #555;border-radius:3px;
+  padding:4px 14px;font-size:12px;color:#dcdcaa;
+  font-family:'Cascadia Code','Consolas',monospace;
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);pointer-events:none;
+}
+
+/* ── WELCOME MODAL (command-palette style) ── */
+.welcome-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  display:flex;align-items:flex-start;justify-content:center;
+  padding-top:60px;z-index:200;backdrop-filter:blur(2px);
+}
+.welcome-overlay{display:flex;}.welcome-overlay.hidden{display:none !important;}
+.welcome-box{
+  background:#252526;border:1px solid #454545;border-radius:6px;
+  width:560px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.8);
+  overflow:hidden;font-family:'Segoe UI',sans-serif;
+  animation:dropIn 0.2s ease-out;
+}
+@keyframes dropIn{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:none;}}
+.wm-header{
+  background:#094771;padding:14px 20px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid #1a6ea0;
+}
+.wm-header-title{font-size:14px;font-weight:600;color:white;}
+.wm-header-sub{font-size:11px;color:rgba(255,255,255,0.6);margin-left:auto;}
+.wm-body{padding:20px 20px 16px;}
+.wm-intro{font-size:13px;color:#cccccc;margin-bottom:16px;line-height:1.6;}
+.wm-intro code{background:#1e1e1e;border:1px solid #444;border-radius:3px;padding:1px 5px;color:#ce9178;font-family:'Cascadia Code','Consolas',monospace;font-size:12px;}
+.wm-steps{margin-bottom:16px;display:flex;flex-direction:column;gap:2px;}
+.wm-step{
+  display:flex;align-items:flex-start;gap:12px;padding:9px 12px;
+  background:#1e1e1e;border-radius:4px;border-left:3px solid transparent;
+  transition:border-color 0.15s;
+}
+.wm-step:hover{border-left-color:#007acc;}
+.wm-step-num{
+  width:20px;height:20px;background:#007acc;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:white;flex-shrink:0;margin-top:1px;
+}
+.wm-step-text{font-size:12px;color:#cccccc;line-height:1.5;}
+.wm-step-text b{color:#dcdcaa;}
+.wm-step-text .hi{color:#4ec9b0;}
+.wm-step-text .err{color:#f44747;}
+.wm-divider{height:1px;background:#3c3c3c;margin:14px 0;}
+.wm-keys{display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap;}
+.wm-key-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#858585;}
+.kbd{
+  background:#3c3c3c;border:1px solid #555;border-bottom:2px solid #444;
+  border-radius:3px;padding:2px 7px;font-size:11px;font-weight:600;
+  color:#d4d4d4;font-family:'Segoe UI',sans-serif;white-space:nowrap;
+}
+.wm-footer{display:flex;justify-content:space-between;align-items:center;}
+.wm-count{font-size:11px;color:#858585;}
+.wm-count b{color:#dcdcaa;}
+.btn-start{
+  background:#007acc;color:white;border:none;padding:8px 24px;
+  border-radius:3px;font-size:13px;cursor:pointer;font-family:'Segoe UI',sans-serif;
+  font-weight:600;transition:background 0.1s;
+}
+.btn-start:hover{background:#1589d4;}
+
+/* ── COMPLETE MODAL ── */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,0.6);
+  display:none;align-items:center;justify-content:center;z-index:100;
+}
+.modal-bg.show{display:flex;}
+.modal{
+  background:#252526;border:1px solid #555;border-radius:4px;
+  width:380px;box-shadow:0 8px 32px rgba(0,0,0,0.6);overflow:hidden;
+  font-family:'Segoe UI',sans-serif;
+}
+.modal-head{
+  background:#094771;padding:12px 16px;font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:8px;
+}
+.modal-body{padding:20px;}
+.modal-big{font-size:28px;font-weight:700;color:#4ec9b0;margin-bottom:4px;font-family:'Cascadia Code',monospace;}
+.modal-msg{font-size:13px;color:#d4d4d4;margin-bottom:6px;}
+.modal-sub{font-size:11px;color:#858585;margin-bottom:18px;}
+.modal-btns{display:flex;justify-content:flex-end;gap:8px;}
+.btn-vs{background:var(--statusbar);color:white;border:none;padding:7px 20px;border-radius:2px;font-size:13px;cursor:pointer;font-family:'Segoe UI',sans-serif;}
+.btn-vs:hover{background:#1589d4;}
+.btn-vs-sec{background:transparent;color:#d4d4d4;border:1px solid #555;padding:7px 20px;border-radius:2px;font-size:13px;cursor:pointer;font-family:'Segoe UI',sans-serif;}
+.btn-vs-sec:hover{background:rgba(255,255,255,0.07);}
+
+/* ── FADE TRANSITION ── */
+.editor-wrap.fading{opacity:0;transition:opacity 0.2s;}
+.editor-wrap.fade-in{opacity:1;transition:opacity 0.3s;}
+
+#hiddenInp{position:absolute;opacity:0;pointer-events:none;top:0;left:0;width:1px;height:1px;}
+</style>
+</head>
+<body>
+
+<!-- TITLE BAR -->
+<div class="titlebar">
+  <div class="tb-dots">
+    <div class="tb-dot r"></div>
+    <div class="tb-dot y"></div>
+    <div class="tb-dot g"></div>
+  </div>
+  <div class="tb-menu">
+    <div class="tb-mi">File</div>
+    <div class="tb-mi">Edit</div>
+    <div class="tb-mi">Selection</div>
+    <div class="tb-mi">View</div>
+    <div class="tb-mi">Go</div>
+    <div class="tb-mi">Run</div>
+    <div class="tb-mi">Terminal</div>
+    <div class="tb-mi">Help</div>
+  </div>
+  <div class="tb-title" id="tbTitle"><b>project-alpha</b> — Visual Studio Code</div>
+  <div class="tb-win">
+    <div class="tb-wb">⎯</div>
+    <div class="tb-wb">⬜</div>
+    <div class="tb-wb close">✕</div>
+  </div>
+</div>
+
+<div class="body">
+  <!-- ACTIVITY BAR -->
+  <div class="actbar">
+    <div class="ab-icon active" title="Explorer"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M3 5C3 4.44772 3.44772 4 4 4H9.58579C9.851 4 10.1054 4.10536 10.2929 4.29289L11.7071 5.70711C11.8946 5.89464 12.149 6 12.4142 6H20C20.5523 6 21 6.44772 21 7V19C21 19.5523 20.5523 20 20 20H4C3.44772 20 3 19.5523 3 19V5Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+</svg></div>
+    <div class="ab-icon" title="Search"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.5"/>
+  <line x1="15.5" y1="15.5" x2="20" y2="20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+</svg></div>
+    <div class="ab-icon" title="Source Control"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <circle cx="6" cy="6" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+  <circle cx="6" cy="18" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+  <circle cx="18" cy="8" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="6" y1="8.5" x2="6" y2="15.5" stroke="currentColor" stroke-width="1.4"/>
+  <path d="M6 8.5 C6 13 18 11 18 10.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
+</svg></div>
+    <div class="ab-icon" title="Run and Debug"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <path d="M8 5.5L18 12L8 18.5V5.5Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+  <circle cx="17" cy="17" r="4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+  <line x1="15.5" y1="17" x2="18.5" y2="17" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+  <line x1="17" y1="15.5" x2="17" y2="18.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+</svg></div>
+    <div class="ab-icon" title="Extensions"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <rect x="3" y="3" width="7.5" height="7.5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/>
+  <rect x="13.5" y="3" width="7.5" height="7.5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/>
+  <rect x="3" y="13.5" width="7.5" height="7.5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/>
+  <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/>
+</svg></div>
+    <div class="ab-bottom">
+      <div class="ab-icon" title="Settings"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.4"/>
+  <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M19.07 4.93l-1.41 1.41M6.34 17.66l-1.41 1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+</svg></div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-title">Explorer</div>
+    <div class="sb-tree" id="sbTree">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- EDITOR CONTAINER -->
+  <div class="editor-container">
+    <!-- TABS -->
+    <div class="tabs" id="tabBar"></div>
+
+    <!-- EDITOR + PANEL -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;">
+      <div class="score-bar" id="scoreBar">🔧 0 / 15 fixed</div>
+
+      <!-- EDITOR WRAP -->
+      <div class="editor-wrap fade-in" id="editorWrap">
+        <div class="editor" id="editorEl">
+          <div class="code-lines" id="codeLines"></div>
+        </div>
+        <div class="minimap" id="minimap">
+          <div class="minimap-viewport"></div>
+          <div class="mini-lines" id="miniLines"></div>
+        </div>
+      </div>
+
+      <!-- PANEL -->
+      <div class="panel">
+        <div class="panel-tabs">
+          <div class="panel-tab" id="ptProblems" onclick="showPanel('problems')">Problems <span id="probCount" style="color:#f44747">1</span></div>
+          <div class="panel-tab active" id="ptTerminal" onclick="showPanel('terminal')">Terminal</div>
+          <div class="panel-actions">
+            <div class="pa-btn" onclick="clearTerminal()">⊘ Clear</div>
+            <div class="pa-btn" title="Maximize">⊡</div>
+          </div>
+        </div>
+        <div class="panel-body" id="panelProblems" style="display:none"></div>
+        <div class="panel-body" id="panelTerminal"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="statusbar" id="statusbar">
+  <div class="sb-item">⎇ main</div>
+  <div class="sb-item sb-err-count" id="sbErrors">
+    <span style="font-size:14px">✕</span> <span id="sbErrNum">1</span>
+    <span style="font-size:14px;margin-left:4px">⚠</span> 0
+  </div>
+  <div class="sb-right">
+    <div class="sb-item" id="sbLang">JavaScript</div>
+    <div class="sb-item">UTF-8</div>
+    <div class="sb-item">Ln 1, Col 1</div>
+    <div class="sb-item">Spaces: 2</div>
+  </div>
+</div>
+
+<!-- WELCOME MODAL -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-box">
+    <div class="wm-header">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <div class="wm-header-title">Debug Session — project-alpha</div>
+      <div class="wm-header-sub">Visual Studio Code</div>
+    </div>
+    <div class="wm-body">
+      <div class="wm-intro">
+        The project has <code id="wmCount">10</code> randomly selected files with bugs — drawn from a pool of 90. Each file contains one wrong value — a constant, a string, or a number. The clue is always hidden in the surrounding <code style="color:#6a9955">// comments</code>. Fix every bug to pass all tests.
+      </div>
+      <div class="wm-steps">
+        <div class="wm-step">
+          <div class="wm-step-num">1</div>
+          <div class="wm-step-text">Read the <b>comments</b> in the code — they contain the riddle or clue for the bug on that line.</div>
+        </div>
+        <div class="wm-step">
+          <div class="wm-step-num">2</div>
+          <div class="wm-step-text">Click the <span class="err">red underlined value</span> to edit it inline, right inside the code.</div>
+        </div>
+        <div class="wm-step">
+          <div class="wm-step-num">3</div>
+          <div class="wm-step-text">Type your answer and press <b>Enter</b>. The terminal will run the tests and tell you if you passed.</div>
+        </div>
+        <div class="wm-step">
+          <div class="wm-step-num">4</div>
+          <div class="wm-step-text">On a correct fix the file turns <span class="hi">teal ✓</span> and you move to the next one automatically.</div>
+        </div>
+      </div>
+      <div class="wm-divider"></div>
+      <div class="wm-keys">
+        <div class="wm-key-row"><span class="kbd">Enter</span> Submit fix</div>
+        <div class="wm-key-row"><span class="kbd">Esc</span> Cancel edit</div>
+        <div class="wm-key-row"><span class="kbd">Problems</span> tab → hint</div>
+      </div>
+      <div class="wm-footer">
+        <div class="wm-count"><b id="wmLevels">90-puzzle pool · 10 per session</b> · answers are case-insensitive</div>
+        <button class="btn-start" onclick="dismissWelcome()">Start Debugging →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETE MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-head">
+      <span>✔</span> All Bugs Fixed — project-alpha
+    </div>
+    <div class="modal-body">
+      <div class="modal-big" id="modalScore"></div>
+      <div class="modal-msg" id="modalMsg"></div>
+      <div class="modal-sub" id="modalSub"></div>
+      <div class="modal-btns">
+        <button class="btn-vs-sec" onclick="document.getElementById('modalBg').classList.remove('show')">Close</button>
+        <button class="btn-vs" onclick="restartGame()">New Session</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input id="hiddenInp" type="text" autocomplete="off" spellcheck="false">
+
+<script>
+// ══════════════════════════════════════════════
+// PUZZLES
+// Each puzzle: one "bug" value in realistic code.
+// The clue is always in the surrounding comments.
+// ══════════════════════════════════════════════
+const PUZZLES = [
+  {
+    file: 'src/http/status.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/http',
+    problemMsg: "TypeError: HTTP_NOT_FOUND=200 fails status validation. 200 means OK, not Not Found.",
+    problemHint: "What HTTP status code means 'Not Found'? You see it on broken links.",
+    lines: [
+`<span class="cmt">// HTTP status code constants</span>`,
+``,
+`<span class="kw">const</span> <span class="vr">HTTP_OK</span>          <span class="op">=</span> <span class="num">200</span>;`,
+`<span class="kw">const</span> <span class="vr">HTTP_CREATED</span>     <span class="op">=</span> <span class="num">201</span>;`,
+`<span class="cmt">// BUG: wrong status code below</span>`,
+`<span class="cmt">// This is what a server returns when a resource is not found.</span>`,
+`<span class="cmt">// You've probably seen this in your browser's address bar.</span>`,
+`<span class="kw">const</span> <span class="type">HTTP_NOT_FOUND</span>   <span class="op">=</span> <span class="bug-val" id="bugSpan">200</span>;`
+    ],
+    bugLine: 7,
+    answer: '404',
+  },
+  {
+    file: 'config/network.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'config',
+    problemMsg: "NetError: HTTPS_PORT=80 fails TLS assertion. Port 80 is HTTP, not HTTPS.",
+    problemHint: "HTTP uses port 80. HTTPS (the secure version) uses a different port — what is it?",
+    lines: [
+`<span class="cmt">// Network port configuration</span>`,
+`<span class="kw">package</span> <span class="vr">config</span>`,
+``,
+`<span class="kw">const</span> <span class="vr">HTTP_PORT</span>  <span class="op">=</span> <span class="num">80</span>`,
+`<span class="cmt">// BUG: HTTPS runs on a different port than HTTP</span>`,
+`<span class="cmt">// HTTP = 80. HTTPS (TLS encrypted) = ???</span>`,
+`<span class="kw">const</span> <span class="type">HTTPS_PORT</span> <span class="op">=</span> <span class="bug-val" id="bugSpan">80</span>`
+    ],
+    bugLine: 6,
+    answer: '443',
+  },
+  {
+    file: 'src/net/handshake.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/net',
+    problemMsg: "ProtocolError: TCP_HANDSHAKE_STEPS=4 wrong. TCP uses a specific number of steps.",
+    problemHint: "TCP connection setup is called a '___-way handshake'. SYN, SYN-ACK, ACK. Count them.",
+    lines: [
+`<span class="cmt"># TCP connection protocol constants</span>`,
+``,
+`<span class="cmt"># BUG: TCP connection uses a specific number of steps.</span>`,
+`<span class="cmt"># The steps are: SYN → SYN-ACK → ACK</span>`,
+`<span class="cmt"># Count the steps. It's called a ___-way handshake.</span>`,
+`<span class="vr">TCP_HANDSHAKE_STEPS</span> <span class="op">=</span> <span class="bug-val" id="bugSpan">4</span>`,
+`<span class="kw">assert</span> <span class="vr">TCP_HANDSHAKE_STEPS</span> <span class="op">==</span> <span class="num">3</span>`
+    ],
+    bugLine: 5,
+    answer: '3',
+  },
+  {
+    file: 'src/os/kernel.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/os',
+    problemMsg: "HistoryError: LINUX_CREATOR='STALLMAN' wrong. Stallman made GNU, not Linux.",
+    problemHint: "GNU/Linux: GNU tools + Linux kernel. Linus ___ created the Linux kernel in 1991.",
+    lines: [
+`<span class="cmt"># OS history constants</span>`,
+`<span class="kw">module</span> <span class="type">OSHistory</span>`,
+`<span class="cmt">  # BUG: wrong Linux kernel creator</span>`,
+`<span class="cmt">  # GNU tools: Stallman. Linux kernel: ???</span>`,
+`<span class="cmt">  # Finnish student who posted to a newsgroup in 1991:</span>`,
+`<span class="cmt">  # "I'm doing a (free) operating system (just a hobby)"</span>`,
+`  <span class="type">LINUX_CREATOR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">STALLMAN</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'torvalds',
+  },
+  {
+    file: 'src/crypto/bitcoin.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/crypto',
+    problemMsg: "IdentityError: BITCOIN_CREATOR='NAKAMOTO' rejected — that's the pseudonym, not the verified name.",
+    problemHint: "Bitcoin's whitepaper was published in 2008 under the pseudonym 'Satoshi ___'. What's the surname?",
+    lines: [
+`<span class="cmt">// Cryptocurrency origin constants</span>`,
+``,
+`<span class="cmt">// BUG: BITCOIN_CREATOR should be the pseudonymous surname</span>`,
+`<span class="cmt">// Bitcoin whitepaper: "Bitcoin: A Peer-to-Peer Electronic Cash System"</span>`,
+`<span class="cmt">// Published 2008 under: Satoshi ???</span>`,
+`<span class="cmt">// Identity still unknown to this day.</span>`,
+`<span class="kw">const</span> <span class="type">BITCOIN_CREATOR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">FINNEY</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'nakamoto',
+  },
+  {
+    file: 'src/js/quirks.js',
+    lang: 'JavaScript',
+    icon: 'js',
+    folder: 'src/js',
+    problemMsg: "TypeError: NULL_TYPE='null' is wrong. typeof null returns something unexpected in JavaScript.",
+    problemHint: "Famous JS bug: typeof null === ??? It's not 'null'. This one surprises everyone the first time.",
+    lines: [
+`<span class="cmt">// JavaScript type quirks — interview classics</span>`,
+``,
+`<span class="cmt">// BUG: typeof null does NOT return "null" in JavaScript</span>`,
+`<span class="cmt">// This is a famous language quirk from 1995.</span>`,
+`<span class="cmt">// Try: typeof null in your browser console.</span>`,
+`<span class="kw">const</span> <span class="type">NULL_TYPE</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">null</span><span class="str">"</span>;`,
+`<span class="fn">console</span>.<span class="fn">assert</span>(<span class="kw">typeof</span> <span class="kw">null</span> <span class="op">===</span> <span class="type">NULL_TYPE</span>);`
+    ],
+    bugLine: 5,
+    answer: 'object',
+  },
+  {
+    file: 'src/k8s/config.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/k8s',
+    problemMsg: "AbbrevError: KUBE_SHORTHAND='k9s' wrong. The official abbreviation is different.",
+    problemHint: "Kubernetes has an official numeric abbreviation: K, then 8 letters, then S. What is it?",
+    lines: [
+`<span class="cmt">// Kubernetes abbreviation constants</span>`,
+`<span class="kw">package</span> <span class="vr">k8s</span>`,
+``,
+`<span class="cmt">// BUG: official Kubernetes abbreviation is wrong</span>`,
+`<span class="cmt">// "Kubernetes" has 10 letters: K-u-b-e-r-n-e-t-e-s</span>`,
+`<span class="cmt">// Shorthand: K + (count of middle letters) + S = ???</span>`,
+`<span class="kw">const</span> <span class="type">KUBE_SHORTHAND</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">k9s</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'k8s',
+  },
+  {
+    file: 'src/react/hooks.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/react',
+    problemMsg: "HookError: SIDE_EFFECT_HOOK='useState' wrong. useState is for state, not side effects.",
+    problemHint: "In React, which hook do you use for side effects — API calls, subscriptions, DOM manipulation?",
+    lines: [
+`<span class="cmt">// React hooks reference — common interview question</span>`,
+``,
+`<span class="cmt">// BUG: wrong hook name below</span>`,
+`<span class="cmt">// useState = manage state values</span>`,
+`<span class="cmt">// ??? = run side effects (fetch, subscriptions, timers)</span>`,
+`<span class="kw">const</span> <span class="type">SIDE_EFFECT_HOOK</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">useState</span><span class="str">"</span>;`,
+`<span class="cmt">// Usage: SIDE_EFFECT_HOOK(() => { fetchData(); }, [])</span>`
+    ],
+    bugLine: 5,
+    answer: 'useEffect',
+  },
+  {
+    file: 'src/git/defaults.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/git',
+    problemMsg: "GitError: DEFAULT_BRANCH='master' is deprecated. Modern Git uses a different default.",
+    problemHint: "GitHub changed the default branch name in 2020. What did 'master' become?",
+    lines: [
+`<span class="cmt"># Git configuration defaults</span>`,
+``,
+`<span class="cmt"># BUG: default branch name has changed</span>`,
+`<span class="cmt"># Since 2020, GitHub changed the default from "master"</span>`,
+`<span class="cmt"># to a more inclusive name. What is the new default?</span>`,
+`<span class="vr">DEFAULT_BRANCH</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">master</span><span class="str">"</span>`
+    ],
+    bugLine: 5,
+    answer: 'main',
+  },
+  {
+    file: 'src/js/creator.js',
+    lang: 'JavaScript',
+    icon: 'js',
+    folder: 'src/js',
+    problemMsg: "HistoryError: JS_CREATOR='JAVA_TEAM' wrong. JavaScript was created by one person in 10 days.",
+    problemHint: "JavaScript was created at Netscape in 1995 in just 10 days. Who created it? (surname)",
+    lines: [
+`<span class="cmt">// Language history — JavaScript origin</span>`,
+``,
+`<span class="cmt">// BUG: JS_CREATOR is wrong</span>`,
+`<span class="cmt">// Created at Netscape in 1995 — not by the Java team.</span>`,
+`<span class="cmt">// One person wrote the first version in just 10 days.</span>`,
+`<span class="cmt">// First name: Brendan. Last name: ???</span>`,
+`<span class="kw">const</span> <span class="type">JS_CREATOR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">JAVA_TEAM</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'eich',
+  },
+  {
+    file: 'src/docker/base.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/docker',
+    problemMsg: "DockerError: DOCKERFILE_FIRST='RUN' wrong. A Dockerfile must start with a specific instruction.",
+    problemHint: "Every Dockerfile must begin with which instruction? It specifies the base image.",
+    lines: [
+`<span class="cmt"># Dockerfile instruction constants</span>`,
+`<span class="kw">module</span> <span class="type">Docker</span>`,
+`<span class="cmt">  # BUG: every Dockerfile starts with this instruction</span>`,
+`<span class="cmt">  # It specifies the base image: ubuntu, alpine, node...</span>`,
+`<span class="cmt">  # First line of every Dockerfile: ??? python:3.11</span>`,
+`  <span class="type">DOCKERFILE_FIRST</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">RUN</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 5,
+    answer: 'FROM',
+  },
+  {
+    file: 'src/css/flex.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/css',
+    problemMsg: "CSSError: FLEX_DEFAULT_DIRECTION='column' wrong. Flexbox items flow in a different default direction.",
+    problemHint: "By default, CSS flexbox lays out items in which direction? (one word)",
+    lines: [
+`<span class="cmt">// CSS Flexbox default values reference</span>`,
+``,
+`<span class="cmt">// BUG: default flex-direction is wrong</span>`,
+`<span class="cmt">// Without setting flex-direction, items flow horizontally.</span>`,
+`<span class="cmt">// Default is 'row', not the vertical direction.</span>`,
+`<span class="kw">const</span> <span class="type">FLEX_DEFAULT_DIRECTION</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">column</span><span class="str">"</span>;`
+    ],
+    bugLine: 5,
+    answer: 'row',
+  },
+  {
+    file: 'src/db/queries.sql.js',
+    lang: 'JavaScript',
+    icon: 'js',
+    folder: 'src/db',
+    problemMsg: "QueryError: UNIQUE_KEYWORD='UNIQUE' wrong. SQL has a specific keyword for removing duplicate rows.",
+    problemHint: "In SQL, SELECT ___ removes duplicate rows from results. Not UNIQUE — one word.",
+    lines: [
+`<span class="cmt">// SQL query builder — keyword constants</span>`,
+``,
+`<span class="cmt">// BUG: wrong SQL keyword for unique rows</span>`,
+`<span class="cmt">// To eliminate duplicate rows in a SELECT:</span>`,
+`<span class="cmt">// SELECT ??? column FROM table</span>`,
+`<span class="cmt">// It's not UNIQUE — that's a constraint, not a query keyword.</span>`,
+`<span class="kw">const</span> <span class="type">UNIQUE_KEYWORD</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">UNIQUE</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'DISTINCT',
+  },
+  {
+    file: 'src/python/origin.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/python',
+    problemMsg: "HistoryError: PYTHON_CREATOR='ROSSUM' first name missing. Need the full surname only.",
+    problemHint: "Python was created by Guido van ___. What's the surname?",
+    lines: [
+`<span class="cmt"># Python language history constants</span>`,
+``,
+`<span class="cmt"># BUG: wrong Python creator surname</span>`,
+`<span class="cmt"># Created by Guido van ??? in the late 1980s.</span>`,
+`<span class="cmt"># Named after Monty Python, not the snake.</span>`,
+`<span class="cmt"># He was the "Benevolent Dictator For Life" until 2018.</span>`,
+`<span class="vr">PYTHON_CREATOR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">STROUSTRUP</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'rossum',
+  },
+  {
+    file: 'src/github/history.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/github',
+    problemMsg: "AcquisitionError: GITHUB_ACQUIRER='GOOGLE' wrong. Check who bought GitHub in 2018.",
+    problemHint: "In 2018, which tech giant acquired GitHub for $7.5 billion?",
+    lines: [
+`<span class="cmt">// Platform acquisition history</span>`,
+`<span class="kw">package</span> <span class="vr">history</span>`,
+``,
+`<span class="cmt">// BUG: wrong acquirer of GitHub</span>`,
+`<span class="cmt">// GitHub was acquired in 2018 for $7.5 billion.</span>`,
+`<span class="cmt">// The buyer also makes Windows, Azure, and Xbox.</span>`,
+`<span class="kw">const</span> <span class="type">GITHUB_ACQUIRER</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">GOOGLE</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'microsoft',
+  },
+  {
+    file: 'src/tv/breaking_bad.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/tv',
+    problemMsg: "CharacterError: HEISENBERG_REAL='PINKMAN' wrong. That's Jesse. Walter White's alias is different.",
+    problemHint: "In Breaking Bad, Walter White adopts a drug empire alias. What does he call himself?",
+    lines: [
+`<span class="cmt">// TV character alias constants — Breaking Bad</span>`,
+``,
+`<span class="cmt">// BUG: Walter White's drug alias is wrong</span>`,
+`<span class="cmt">// "Say my name." — famous S5 scene</span>`,
+`<span class="cmt">// He named himself after a famous physicist.</span>`,
+`<span class="cmt">// Walter White calls himself: ???</span>`,
+`<span class="kw">const</span> <span class="type">WALTER_WHITE_ALIAS</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">PINKMAN</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'heisenberg',
+  },
+  {
+    file: 'src/film/nolan.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/film',
+    problemMsg: "FilmError: DREAM_FILM='INTERSTELLAR' wrong. Different Nolan film is about dream heist.",
+    problemHint: "Christopher Nolan's 2010 film about entering dreams to steal/plant ideas. One word title.",
+    lines: [
+`<span class="cmt"># Christopher Nolan filmography constants</span>`,
+``,
+`<span class="cmt"># BUG: wrong Nolan film title</span>`,
+`<span class="cmt"># Released 2010. Stars Leonardo DiCaprio.</span>`,
+`<span class="cmt"># Premise: enter people's dreams to steal information.</span>`,
+`<span class="cmt"># Famous spinning top ending. Title = one word.</span>`,
+`<span class="vr">DREAM_HEIST_FILM</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">INTERSTELLAR</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'inception',
+  },
+  {
+    file: 'src/marvel/thanos.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/marvel',
+    problemMsg: "VillainError: INFINITY_WAR_VILLAIN='ULTRON' wrong. Different villain snapped in Infinity War.",
+    problemHint: "Which Marvel villain collected all 6 Infinity Stones and wiped out half of all life with a snap?",
+    lines: [
+`<span class="cmt">// Marvel villain constants — Infinity War</span>`,
+``,
+`<span class="cmt">// BUG: wrong MCU villain</span>`,
+`<span class="cmt">// Avengers: Infinity War (2018) main antagonist.</span>`,
+`<span class="cmt">// Collected all 6 Infinity Stones.</span>`,
+`<span class="cmt">// One snap. Half of all life. Gone.</span>`,
+`<span class="kw">const</span> <span class="type">INFINITY_VILLAIN</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">ULTRON</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'thanos',
+  },
+  {
+    file: 'lib/got/author.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'lib/got',
+    problemMsg: "AuthorError: GOT_AUTHOR='TOLKIEN' wrong. Game of Thrones is based on books by someone else.",
+    problemHint: "Game of Thrones is based on 'A Song of Ice and Fire' by George R.R. ___. Surname only.",
+    lines: [
+`<span class="cmt"># Literary adaptation constants — Game of Thrones</span>`,
+`<span class="kw">module</span> <span class="type">Literature</span>`,
+`<span class="cmt">  # BUG: wrong author of "A Song of Ice and Fire"</span>`,
+`<span class="cmt">  # Game of Thrones is adapted from this book series.</span>`,
+`<span class="cmt">  # Author full name: George R.R. ???</span>`,
+`<span class="cmt">  # Still hasn't finished the last two books...</span>`,
+`  <span class="type">ASOIAF_AUTHOR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">TOLKIEN</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'martin',
+  },
+  {
+    file: 'src/film/parasite.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/film',
+    problemMsg: "DirectorError: PARASITE_DIRECTOR='PARK' wrong. Different Korean director made Parasite.",
+    problemHint: "Parasite (2019) won Best Picture at the Oscars. Who directed it? (surname — his first name is a colour)",
+    lines: [
+`<span class="cmt">// Oscar Best Picture winners reference</span>`,
+`<span class="kw">package</span> <span class="vr">film</span>`,
+``,
+`<span class="cmt">// BUG: wrong director of Parasite (2019)</span>`,
+`<span class="cmt">// First non-English film to win Oscar Best Picture.</span>`,
+`<span class="cmt">// Director's first name is a colour. Surname: ???</span>`,
+`<span class="kw">const</span> <span class="type">PARASITE_DIRECTOR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">PARK</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'bong',
+  },
+  {
+    file: 'src/music/queen.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/music',
+    problemMsg: "BandError: RHAPSODY_BAND='RADIOHEAD' wrong. Bohemian Rhapsody was by a different band.",
+    problemHint: "'Bohemian Rhapsody', 'We Will Rock You', 'Don't Stop Me Now' — all by which rock band?",
+    lines: [
+`<span class="cmt"># Classic rock band constants</span>`,
+``,
+`<span class="cmt"># BUG: wrong band name</span>`,
+`<span class="cmt"># "Bohemian Rhapsody", "We Will Rock You",</span>`,
+`<span class="cmt"># "Don't Stop Me Now", "Under Pressure"</span>`,
+`<span class="cmt"># All by the same band. Freddie Mercury was the lead.</span>`,
+`<span class="vr">RHAPSODY_BAND</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">RADIOHEAD</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'queen',
+  },
+  {
+    file: 'src/film/matrix.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/film',
+    problemMsg: "PillError: TRUTH_PILL='BLUE' wrong. The red pill reveals the truth, blue pill is comfortable ignorance.",
+    problemHint: "In The Matrix, Morpheus offers two pills. Which colour do you take to see the truth?",
+    lines: [
+`<span class="cmt">// The Matrix — iconic choice constants</span>`,
+``,
+`<span class="cmt">// BUG: wrong pill colour for truth</span>`,
+`<span class="cmt">// Morpheus: "You take the blue pill, the story ends."</span>`,
+`<span class="cmt">// "You take the ??? pill, you stay in Wonderland."</span>`,
+`<span class="cmt">// Which pill shows you how deep the rabbit hole goes?</span>`,
+`<span class="kw">const</span> <span class="type">TRUTH_PILL</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">BLUE</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'red',
+  },
+  {
+    file: 'src/tv/squid.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/tv',
+    problemMsg: "ContestantError: FINAL_PLAYER_NUM=1 wrong. Squid Game contestants start with a specific number.",
+    problemHint: "In Squid Game, the main character is Player ___. He's the one who almost always wears that green tracksuit.",
+    lines: [
+`<span class="cmt">// Squid Game — player number constants</span>`,
+`<span class="kw">package</span> <span class="vr">tv</span>`,
+``,
+`<span class="cmt">// BUG: wrong player number for the protagonist</span>`,
+`<span class="cmt">// 456 players total. Main character: Seong Gi-hun.</span>`,
+`<span class="cmt">// His player number is the last number — what is it?</span>`,
+`<span class="kw">const</span> <span class="type">PROTAGONIST_NUMBER</span> <span class="op">=</span> <span class="bug-val" id="bugSpan">1</span>`
+    ],
+    bugLine: 6,
+    answer: '456',
+  },
+  {
+    file: 'src/music/swift.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/music',
+    problemMsg: "TourError: SWIFT_2023_TOUR='REPUTATION' wrong. Her 2023–2024 tour had a different name.",
+    problemHint: "Taylor Swift's record-breaking 2023–2024 stadium tour was named after her concert film. What tour?",
+    lines: [
+`<span class="cmt"># Music tour constants — Taylor Swift</span>`,
+`<span class="kw">module</span> <span class="type">Music</span>`,
+`<span class="cmt">  # BUG: wrong tour name</span>`,
+`<span class="cmt">  # Highest-grossing concert tour of all time.</span>`,
+`<span class="cmt">  # Named because it visits all her musical ??? over the years.</span>`,
+`<span class="cmt">  # The ___ Tour (2023–2024)</span>`,
+`  <span class="type">SWIFT_2023_TOUR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">REPUTATION</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'eras',
+  },
+  {
+    file: 'src/tv/office.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/tv',
+    problemMsg: "CharacterError: OFFICE_BOSS='HALPERT' wrong. Jim Halpert was a salesman, not the boss.",
+    problemHint: "In The Office (US), who is the Regional Manager of Dunder Mifflin Scranton? (surname)",
+    lines: [
+`<span class="cmt"># The Office character constants</span>`,
+``,
+`<span class="cmt"># BUG: wrong character is assigned as boss</span>`,
+`<span class="cmt"># Regional Manager of Dunder Mifflin, Scranton branch.</span>`,
+`<span class="cmt"># "That's what she said." — his catchphrase.</span>`,
+`<span class="cmt"># First name: Michael. Surname: ???</span>`,
+`<span class="vr">SCRANTON_BOSS</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">HALPERT</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'scott',
+  },
+  {
+    file: 'src/film/batman.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/film',
+    problemMsg: "CastingError: DARK_KNIGHT_BATMAN='AFFLECK' wrong. Affleck played Batman later. Check 2005–2012.",
+    problemHint: "Christopher Nolan's Dark Knight trilogy (2005–2012): who played Bruce Wayne/Batman? (surname)",
+    lines: [
+`<span class="cmt">// Batman casting history — Nolan trilogy</span>`,
+`<span class="kw">package</span> <span class="vr">film</span>`,
+``,
+`<span class="cmt">// BUG: wrong actor for Nolan's Batman</span>`,
+`<span class="cmt">// The Dark Knight trilogy: 2005–2012</span>`,
+`<span class="cmt">// Affleck played Batman in 2016 (different universe).</span>`,
+`<span class="cmt">// Nolan's choice was a different British actor. Surname: ???</span>`,
+`<span class="kw">const</span> <span class="type">DARK_KNIGHT_BATMAN</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">AFFLECK</span><span class="str">"</span>`
+    ],
+    bugLine: 7,
+    answer: 'bale',
+  },
+  {
+    file: 'src/streaming/stranger.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/streaming',
+    problemMsg: "SettingError: HAWKINS_STATE='OHIO' wrong. Stranger Things is set in a different Midwestern state.",
+    problemHint: "Stranger Things is set in the fictional town of Hawkins. Which US state is it in?",
+    lines: [
+`<span class="cmt">// Stranger Things — fictional location constants</span>`,
+``,
+`<span class="cmt">// BUG: wrong US state for Hawkins</span>`,
+`<span class="cmt">// The show is set in Hawkins, a fictional small town.</span>`,
+`<span class="cmt">// It's in the Midwest. The Upside Down is underneath it.</span>`,
+`<span class="cmt">// State: ???. (Not Ohio — check the show's opening card)</span>`,
+`<span class="kw">const</span> <span class="type">HAWKINS_STATE</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">OHIO</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'indiana',
+  },
+  {
+    file: 'src/film/joker.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/film',
+    problemMsg: "ActorError: JOKER_2019='LETO' wrong. Jared Leto played a different Joker in a different film.",
+    problemHint: "Who played the Joker in the 2019 standalone film that won him an Oscar? (surname)",
+    lines: [
+`<span class="cmt"># Joker (2019) — cast constants</span>`,
+`<span class="kw">module</span> <span class="type">Film</span>`,
+`<span class="cmt">  # BUG: wrong actor for Joker (2019)</span>`,
+`<span class="cmt">  # Leto played Joker in Suicide Squad (2016). Different film.</span>`,
+`<span class="cmt">  # This actor won the Academy Award for Best Actor for this role.</span>`,
+`<span class="cmt">  # First name: Joaquin. Surname: ???</span>`,
+`  <span class="type">JOKER_2019_ACTOR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">LETO</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'phoenix',
+  },
+  {
+    file: 'src/books/dune.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/books',
+    problemMsg: "AuthorError: DUNE_AUTHOR='ASIMOV' wrong. Isaac Asimov wrote Foundation, not Dune.",
+    problemHint: "Dune (1965), the science-fiction novel set on the desert planet Arrakis. Who wrote it? (surname)",
+    lines: [
+`<span class="cmt">// Sci-fi novel author constants</span>`,
+`<span class="kw">package</span> <span class="vr">books</span>`,
+``,
+`<span class="cmt">// BUG: wrong Dune author</span>`,
+`<span class="cmt">// "Dune" (1965) — set on desert planet Arrakis.</span>`,
+`<span class="cmt">// Asimov wrote Foundation. Dune was written by Frank ???</span>`,
+`<span class="kw">const</span> <span class="type">DUNE_AUTHOR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">ASIMOV</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'herbert',
+  },
+  {
+    file: 'src/tv/black_mirror.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/tv',
+    problemMsg: "CreatorError: BLACK_MIRROR_CREATOR='MCKAY' wrong. Adam McKay makes films, not Black Mirror.",
+    problemHint: "Black Mirror, the British tech-dystopia anthology series. Who created and writes most episodes? (surname)",
+    lines: [
+`<span class="cmt"># Black Mirror — creator constants</span>`,
+``,
+`<span class="cmt"># BUG: wrong creator of Black Mirror</span>`,
+`<span class="cmt"># British anthology series: technology gone wrong.</span>`,
+`<span class="cmt"># First aired 2011 on Channel 4, later Netflix.</span>`,
+`<span class="cmt"># Creator and writer: Charlie ???</span>`,
+`<span class="vr">BLACK_MIRROR_CREATOR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">MCKAY</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'brooker',
+  },
+  {
+    file: 'src/chem/elements.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/chem',
+    problemMsg: "ChemError: ELEMENT_AU='SILVER' wrong. Ag is silver. Au is something else.",
+    problemHint: "In the periodic table, Au is the chemical symbol for which element? (Ag is silver)",
+    lines: [
+`<span class="cmt">// Chemical element symbol constants</span>`,
+``,
+`<span class="kw">const</span> <span class="vr">ELEMENT_AG</span> <span class="op">=</span> <span class="str">"silver"</span>;`,
+`<span class="kw">const</span> <span class="vr">ELEMENT_FE</span> <span class="op">=</span> <span class="str">"iron"</span>;`,
+`<span class="cmt">// BUG: Au is NOT silver (that's Ag)</span>`,
+`<span class="cmt">// Au comes from the Latin word "aurum"</span>`,
+`<span class="kw">const</span> <span class="type">ELEMENT_AU</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">SILVER</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'gold',
+  },
+  {
+    file: 'src/chem/mercury.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/chem',
+    problemMsg: "ChemError: LIQUID_METAL_AT_ROOM_TEMP='GALLIUM' fails standard test. Mercury is the classic answer.",
+    problemHint: "Which metal is liquid at room temperature? It's in old thermometers and was called 'quicksilver'.",
+    lines: [
+`<span class="cmt">// Materials science — metal states at room temperature</span>`,
+`<span class="kw">package</span> <span class="vr">chem</span>`,
+``,
+`<span class="cmt">// BUG: wrong liquid metal at room temperature</span>`,
+`<span class="cmt">// Found in old thermometers. Heavy and silvery.</span>`,
+`<span class="cmt">// Also called "quicksilver". Chemical symbol: Hg.</span>`,
+`<span class="kw">const</span> <span class="type">LIQUID_METAL</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">GALLIUM</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'mercury',
+  },
+  {
+    file: 'src/geo/oceans.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/geo',
+    problemMsg: "GeoError: LARGEST_OCEAN='ATLANTIC' wrong. The Atlantic is second. Largest is different.",
+    problemHint: "Which is the largest ocean on Earth? It covers more than 30% of Earth's total surface area.",
+    lines: [
+`<span class="cmt"># World ocean size constants</span>`,
+``,
+`<span class="cmt"># BUG: wrong largest ocean</span>`,
+`<span class="cmt"># Atlantic: 106M km². Indian: 70M km².</span>`,
+`<span class="cmt"># The largest ocean covers over 165 million km².</span>`,
+`<span class="cmt"># It borders Asia, Australia, North and South America.</span>`,
+`<span class="vr">LARGEST_OCEAN</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">ATLANTIC</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'pacific',
+  },
+  {
+    file: 'src/history/berlin.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/history',
+    problemMsg: "HistoryError: BERLIN_WALL_FELL=1991 wrong. 1991 was the USSR dissolution. Wall fell earlier.",
+    problemHint: "The Berlin Wall fell in what year? Crowds began tearing it down on November 9th of that year.",
+    lines: [
+`<span class="cmt"># Cold War history constants</span>`,
+`<span class="kw">module</span> <span class="type">History</span>`,
+`<span class="cmt">  # BUG: wrong year the Berlin Wall fell</span>`,
+`<span class="cmt">  # The wall divided East and West Berlin from 1961.</span>`,
+`<span class="cmt">  # Crowds started demolishing it on November 9th of what year?</span>`,
+`<span class="cmt">  # (1991 was the USSR dissolution — earlier than that)</span>`,
+`  <span class="type">BERLIN_WALL_FELL</span> <span class="op">=</span> <span class="bug-val" id="bugSpan">1991</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: '1989',
+  },
+  {
+    file: 'src/space/moon.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/space',
+    problemMsg: "AstroError: MOON_LANDING_YEAR=1971 wrong. Apollo 11 landed in a different year.",
+    problemHint: "Apollo 11 landed on the Moon and Neil Armstrong took his first steps. What year?",
+    lines: [
+`<span class="cmt">// Space exploration milestone constants</span>`,
+`<span class="kw">package</span> <span class="vr">space</span>`,
+``,
+`<span class="cmt">// BUG: wrong year for the first Moon landing</span>`,
+`<span class="cmt">// Apollo 11 mission. Neil Armstrong and Buzz Aldrin.</span>`,
+`<span class="cmt">// "One small step for man, one giant leap for mankind."</span>`,
+`<span class="kw">const</span> <span class="type">MOON_LANDING_YEAR</span> <span class="op">=</span> <span class="bug-val" id="bugSpan">1971</span>`
+    ],
+    bugLine: 6,
+    answer: '1969',
+  },
+  {
+    file: 'src/geo/capitals.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/geo',
+    problemMsg: "GeoError: AUSTRALIA_CAPITAL='SYDNEY' wrong. Sydney is the largest city, not the capital.",
+    problemHint: "Sydney is Australia's biggest city, but NOT the capital. What is the actual capital of Australia?",
+    lines: [
+`<span class="cmt"># World capital cities — common misconceptions</span>`,
+``,
+`<span class="cmt"># BUG: Sydney is NOT Australia's capital</span>`,
+`<span class="cmt"># Sydney is the most famous and largest city.</span>`,
+`<span class="cmt"># But Australia's actual capital was purpose-built</span>`,
+`<span class="cmt"># as a compromise between Sydney and Melbourne.</span>`,
+`<span class="vr">AUSTRALIA_CAPITAL</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">SYDNEY</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'canberra',
+  },
+  {
+    file: 'src/geo/smallest.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/geo',
+    problemMsg: "GeoError: SMALLEST_COUNTRY='MONACO' wrong. Monaco is second smallest. Smallest is inside Rome.",
+    problemHint: "What is the smallest country in the world by area? It's an independent state inside Rome.",
+    lines: [
+`<span class="cmt">// World geography — size extremes</span>`,
+``,
+`<span class="cmt">// BUG: wrong smallest country</span>`,
+`<span class="cmt">// Monaco is 2nd smallest (2km²).</span>`,
+`<span class="cmt">// The actual smallest is entirely surrounded by Rome, Italy.</span>`,
+`<span class="cmt">// Has its own pope, army, and postal service. Area: 0.44 km²</span>`,
+`<span class="kw">const</span> <span class="type">SMALLEST_COUNTRY</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">MONACO</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'vatican',
+  },
+  {
+    file: 'src/language/spoken.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/language',
+    problemMsg: "LangError: MOST_SPOKEN_LANGUAGE='SPANISH' wrong. More native speakers exist for another language.",
+    problemHint: "What is the most spoken language in the world by number of native speakers? Not English.",
+    lines: [
+`<span class="cmt">// World language statistics</span>`,
+`<span class="kw">package</span> <span class="vr">language</span>`,
+``,
+`<span class="cmt">// BUG: wrong most-spoken language (by native speakers)</span>`,
+`<span class="cmt">// English has most total speakers including second-language.</span>`,
+`<span class="cmt">// But for NATIVE speakers, over 900 million speak this language.</span>`,
+`<span class="cmt">// It's the official language of China.</span>`,
+`<span class="kw">const</span> <span class="type">MOST_SPOKEN_NATIVE</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">SPANISH</span><span class="str">"</span>`
+    ],
+    bugLine: 7,
+    answer: 'mandarin',
+  },
+  {
+    file: 'src/space/planet.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/space',
+    problemMsg: "AstroError: LARGEST_PLANET='SATURN' wrong. Saturn is second largest. Check your solar system.",
+    problemHint: "What is the largest planet in our solar system? A gas giant with a Great Red Spot.",
+    lines: [
+`<span class="cmt"># Solar system size constants</span>`,
+`<span class="kw">module</span> <span class="type">SolarSystem</span>`,
+`<span class="cmt">  # BUG: wrong largest planet</span>`,
+`<span class="cmt">  # Saturn (rings) = 2nd largest. Uranus = 3rd. Neptune = 4th.</span>`,
+`<span class="cmt">  # The largest has a storm called the Great Red Spot.</span>`,
+`<span class="cmt">  # It's so big, ~1,300 Earths could fit inside it.</span>`,
+`  <span class="type">LARGEST_PLANET</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">SATURN</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'jupiter',
+  },
+  {
+    file: 'src/bio/speed.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/bio',
+    problemMsg: "BioError: FASTEST_LAND_ANIMAL='LION' wrong. Lions top out around 80 km/h. Another animal is faster.",
+    problemHint: "What is the fastest land animal? It can reach speeds of 112 km/h (70 mph) in short bursts.",
+    lines: [
+`<span class="cmt"># Animal speed constants — biology reference</span>`,
+``,
+`<span class="cmt"># BUG: wrong fastest land animal</span>`,
+`<span class="cmt"># Lions: ~80 km/h. Horses: ~70 km/h. Usain Bolt: ~45 km/h.</span>`,
+`<span class="cmt"># The fastest land animal reaches 112 km/h in short bursts.</span>`,
+`<span class="cmt"># It's a spotted big cat found in Africa and Iran.</span>`,
+`<span class="vr">FASTEST_LAND_ANIMAL</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">LION</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'cheetah',
+  },
+  {
+    file: 'src/history/marriage.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/history',
+    problemMsg: "LegalError: FIRST_SAME_SEX_MARRIAGE_COUNTRY='SWEDEN' wrong. Sweden legalised in 2009. Earlier country exists.",
+    problemHint: "Which country was the first in the world to legalise same-sex marriage? It happened in 2001.",
+    lines: [
+`<span class="cmt">// LGBTQ+ rights history constants</span>`,
+``,
+`<span class="cmt">// BUG: wrong first country to legalise same-sex marriage</span>`,
+`<span class="cmt">// Sweden legalised in 2009. Belgium in 2003. Spain 2005.</span>`,
+`<span class="cmt">// The FIRST country did it in 2001.</span>`,
+`<span class="cmt">// It's a Western European country known for tulips and canals.</span>`,
+`<span class="kw">const</span> <span class="type">FIRST_SSM_COUNTRY</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">SWEDEN</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'netherlands',
+  },
+  {
+    file: 'src/history/iphone.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/history',
+    problemMsg: "TechHistoryError: FIRST_IPHONE_YEAR=2005 wrong. The iPhone wasn't announced until later.",
+    problemHint: "Steve Jobs announced the first iPhone at Macworld on January 9th of what year?",
+    lines: [
+`<span class="cmt">// Apple product history constants</span>`,
+`<span class="kw">package</span> <span class="vr">history</span>`,
+``,
+`<span class="cmt">// BUG: wrong year for the first iPhone announcement</span>`,
+`<span class="cmt">// Steve Jobs: "every once in a while a revolutionary product comes along"</span>`,
+`<span class="cmt">// Macworld Expo, San Francisco. Not 2005 — what year?</span>`,
+`<span class="kw">const</span> <span class="type">FIRST_IPHONE_YEAR</span> <span class="op">=</span> <span class="bug-val" id="bugSpan">2005</span>`
+    ],
+    bugLine: 6,
+    answer: '2007',
+  },
+  {
+    file: 'src/biology/dna.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/biology',
+    problemMsg: "GeneticsError: DNA_A_PAIRS_WITH='GUANINE' wrong. Adenine doesn't pair with guanine in DNA.",
+    problemHint: "In DNA base pairing: Adenine (A) pairs with ___. Cytosine (C) pairs with Guanine (G).",
+    lines: [
+`<span class="cmt"># DNA base pairing constants</span>`,
+`<span class="kw">module</span> <span class="type">Genetics</span>`,
+`<span class="cmt">  # BUG: wrong base pairing for Adenine</span>`,
+`<span class="cmt">  # Chargaff's rules: C pairs with G, A pairs with ???</span>`,
+`<span class="cmt">  # In DNA: two purines can't pair together.</span>`,
+`<span class="cmt">  # Hint: Adenine pairs with T_______e</span>`,
+`  <span class="type">ADENINE_PAIRS_WITH</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">GUANINE</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'thymine',
+  },
+  {
+    file: 'src/history/waterloo.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/history',
+    problemMsg: "HistoryError: NAPOLEON_FINAL_BATTLE='TRAFALGAR' wrong. He wasn't at Trafalgar. Different final battle.",
+    problemHint: "Napoleon's final military defeat in 1815 was at the Battle of ___. ABBA wrote a song about it.",
+    lines: [
+`<span class="cmt"># Napoleonic Wars constants</span>`,
+``,
+`<span class="cmt"># BUG: wrong name for Napoleon's final battle (1815)</span>`,
+`<span class="cmt"># Trafalgar was 1805 at sea — Napoleon wasn't there.</span>`,
+`<span class="cmt">// His final defeat was in present-day Belgium.</span>`,
+`<span class="cmt"># ABBA famously wrote a song sharing this battle's name.</span>`,
+`<span class="vr">NAPOLEON_FINAL_BATTLE</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">TRAFALGAR</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'waterloo',
+  },
+  {
+    file: 'src/history/war.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/history',
+    problemMsg: "HistoryError: LONGEST_US_WAR='VIETNAM' wrong. Vietnam lasted ~20 years. A more recent war was longer.",
+    problemHint: "What is the longest war in US history? It lasted 20 years (2001–2021).",
+    lines: [
+`<span class="cmt">// US military history constants</span>`,
+``,
+`<span class="cmt">// BUG: wrong longest US war</span>`,
+`<span class="cmt">// Vietnam War: ~19 years (1955–1975).</span>`,
+`<span class="cmt">// A more recent war started after September 11, 2001.</span>`,
+`<span class="cmt">// US troops withdrew in 2021. Duration: ~20 years.</span>`,
+`<span class="kw">const</span> <span class="type">LONGEST_US_WAR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">VIETNAM</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'afghanistan',
+  },
+  {
+    file: 'src/geo/desert.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/geo',
+    problemMsg: "GeoError: LARGEST_DESERT='SAHARA' wrong. The Sahara is the largest hot desert, but overall largest is different.",
+    problemHint: "What is the world's largest desert by area? (Hot deserts are NOT the answer — think cold)",
+    lines: [
+`<span class="cmt">// World geography — size extremes</span>`,
+`<span class="kw">package</span> <span class="vr">geo</span>`,
+``,
+`<span class="cmt">// BUG: the Sahara is the largest HOT desert, not overall.</span>`,
+`<span class="cmt">// A desert is defined as an area with very little precipitation.</span>`,
+`<span class="cmt">// The actual largest is a frozen continent at the South Pole.</span>`,
+`<span class="kw">const</span> <span class="type">LARGEST_DESERT</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">SAHARA</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'antarctica',
+  },
+  {
+    file: 'src/amazon/founder.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/amazon',
+    problemMsg: "HistoryError: AMAZON_FOUNDER='ZUCKERBERG' wrong. Zuckerberg founded Facebook, not Amazon.",
+    problemHint: "Jeff ___ founded Amazon in 1994, starting it as an online bookstore. Surname?",
+    lines: [
+`<span class="cmt"># Tech company founder constants</span>`,
+`<span class="kw">module</span> <span class="type">TechHistory</span>`,
+`<span class="cmt">  # BUG: wrong Amazon founder</span>`,
+`<span class="cmt">  # Amazon started in 1994 as an online bookstore.</span>`,
+`<span class="cmt">  # Founder worked at hedge fund D. E. Shaw before this.</span>`,
+`<span class="cmt">  # He later founded Blue Origin. First name: Jeff. Surname: ???</span>`,
+`  <span class="type">AMAZON_FOUNDER</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">ZUCKERBERG</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'bezos',
+  },
+  {
+    file: 'src/google/parent.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/google',
+    problemMsg: "OrgError: GOOGLE_PARENT_COMPANY='GOOGLE' wrong. Google restructured under a parent company in 2015.",
+    problemHint: "In 2015, Google reorganised and created a new parent holding company. What is it called?",
+    lines: [
+`<span class="cmt"># Corporate structure constants — Google/Alphabet</span>`,
+``,
+`<span class="cmt"># BUG: Google's parent company name is wrong</span>`,
+`<span class="cmt"># In 2015, Larry Page and Sergey Brin restructured Google.</span>`,
+`<span class="cmt"># They created a holding company that owns Google, DeepMind,</span>`,
+`<span class="cmt"># Waymo, Calico, and others. Parent company name: ???</span>`,
+`<span class="vr">GOOGLE_PARENT</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">GOOGLE</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'alphabet',
+  },
+  {
+    file: 'src/ai/chatgpt.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/ai',
+    problemMsg: "OrgError: CHATGPT_COMPANY='DEEPMIND' wrong. DeepMind is owned by Google. ChatGPT is different.",
+    problemHint: "Which company created ChatGPT and released it in November 2022?",
+    lines: [
+`<span class="cmt">// AI company constants — who made what</span>`,
+``,
+`<span class="cmt">// BUG: wrong company that created ChatGPT</span>`,
+`<span class="cmt">// DeepMind (Google) made AlphaGo, Gemini.</span>`,
+`<span class="cmt">// ChatGPT was released November 2022 by a different company.</span>`,
+`<span class="cmt">// Founded in San Francisco. Investors include Microsoft.</span>`,
+`<span class="kw">const</span> <span class="type">CHATGPT_COMPANY</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">DEEPMIND</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'openai',
+  },
+  {
+    file: 'src/streaming/netflix.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/streaming',
+    problemMsg: "BizError: NETFLIX_ORIGIN='STREAMING' wrong. Netflix didn't start as a streaming service.",
+    problemHint: "Netflix was founded in 1997. What did it originally offer before pivoting to streaming?",
+    lines: [
+`<span class="cmt">// Netflix business history constants</span>`,
+`<span class="kw">package</span> <span class="vr">streaming</span>`,
+``,
+`<span class="cmt">// BUG: Netflix didn't start as a streaming service</span>`,
+`<span class="cmt">// Reed Hastings founded it in 1997 with a different model.</span>`,
+`<span class="cmt">// You'd order them online and they'd arrive by post.</span>`,
+`<span class="cmt">// Original business: ___ rental by mail</span>`,
+`<span class="kw">const</span> <span class="type">NETFLIX_ORIGIN</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">STREAMING</span><span class="str">"</span>`
+    ],
+    bugLine: 7,
+    answer: 'dvd',
+  },
+  {
+    file: 'src/twitter/rebrand.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/twitter',
+    problemMsg: "BrandError: TWITTER_NEW_NAME='THREADS' wrong. Meta made Threads. Twitter was rebranded differently.",
+    problemHint: "In 2023, Elon Musk rebranded Twitter. What single letter is it now called?",
+    lines: [
+`<span class="cmt"># Social media rebrand constants</span>`,
+`<span class="kw">module</span> <span class="type">SocialMedia</span>`,
+`<span class="cmt">  # BUG: wrong new name for Twitter</span>`,
+`<span class="cmt">  # Elon Musk acquired Twitter in October 2022.</span>`,
+`<span class="cmt">  # In July 2023 he rebranded it — changed the logo too.</span>`,
+`<span class="cmt">  # New name is a single letter. Not T. What is it?</span>`,
+`  <span class="type">TWITTER_REBRAND</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">THREADS</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'x',
+  },
+  {
+    file: 'src/tiktok/parent.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/tiktok',
+    problemMsg: "OrgError: TIKTOK_PARENT='TENCENT' wrong. Tencent owns WeChat. TikTok has a different parent.",
+    problemHint: "What Chinese company owns TikTok? It also runs Douyin, the Chinese version of TikTok.",
+    lines: [
+`<span class="cmt"># Tech company ownership constants</span>`,
+``,
+`<span class="cmt"># BUG: wrong parent company of TikTok</span>`,
+`<span class="cmt"># Tencent owns WeChat, QQ, and stakes in many firms.</span>`,
+`<span class="cmt"># TikTok's parent is a different Chinese company.</span>`,
+`<span class="cmt"># Also runs Douyin (TikTok's Chinese version). Name: ???</span>`,
+`<span class="vr">TIKTOK_PARENT</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">TENCENT</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'bytedance',
+  },
+  {
+    file: 'src/spotify/founded.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/spotify',
+    problemMsg: "DateError: SPOTIFY_FOUNDED=2010 wrong. Spotify launched publicly in 2008 in Europe.",
+    problemHint: "Spotify was founded in Sweden and launched in 2008. It reached the US in what year? Actually — what year was it founded?",
+    lines: [
+`<span class="cmt">// Music streaming history constants</span>`,
+``,
+`<span class="cmt">// BUG: wrong Spotify founding year</span>`,
+`<span class="cmt">// Founded by Daniel Ek and Martin Lorentzon in Stockholm.</span>`,
+`<span class="cmt">// Public launch was in Europe in late 2008.</span>`,
+`<span class="cmt">// But the company was actually incorporated in: ???</span>`,
+`<span class="kw">const</span> <span class="type">SPOTIFY_FOUNDED</span> <span class="op">=</span> <span class="bug-val" id="bugSpan">2010</span>;`
+    ],
+    bugLine: 6,
+    answer: '2006',
+  },
+  {
+    file: 'src/apple/first.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/apple',
+    problemMsg: "ProductError: APPLE_FIRST_PRODUCT='MACINTOSH' wrong. The Mac launched in 1984. Apple started earlier.",
+    problemHint: "Apple was founded in 1976. What was the company's very first product? (two words — give the first word)",
+    lines: [
+`<span class="cmt">// Apple Inc. product history</span>`,
+`<span class="kw">package</span> <span class="vr">history</span>`,
+``,
+`<span class="cmt">// BUG: wrong Apple first product</span>`,
+`<span class="cmt">// Macintosh launched in 1984 with famous "1984" Super Bowl ad.</span>`,
+`<span class="cmt">// But the FIRST Apple product was introduced in 1976.</span>`,
+`<span class="cmt">// It was called "Apple ___" and was a bare circuit board.</span>`,
+`<span class="kw">const</span> <span class="type">APPLE_FIRST_PRODUCT</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">MACINTOSH</span><span class="str">"</span>`
+    ],
+    bugLine: 7,
+    answer: 'apple1',
+  },
+  {
+    file: 'src/openai/models.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/openai',
+    problemMsg: "ModelError: GPT_FAMILY='BERT' wrong. BERT is Google's model family. OpenAI uses different naming.",
+    problemHint: "OpenAI's large language model family is called GPT. What does GPT stand for? (give the G word)",
+    lines: [
+`<span class="cmt"># AI model family constants</span>`,
+`<span class="kw">module</span> <span class="type">AIModels</span>`,
+`<span class="cmt">  # BUG: wrong model family name for OpenAI</span>`,
+`<span class="cmt">  # BERT = Bidirectional Encoder (Google/Google Brain)</span>`,
+`<span class="cmt">  # OpenAI's models: GPT-1 through GPT-4 and beyond</span>`,
+`<span class="cmt">  # GPT = Generative Pre-trained ___. What's the T?</span>`,
+`  <span class="type">OPENAI_MODEL_FAMILY</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">BERT</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'transformer',
+  },
+  {
+    file: 'src/spacex/rocket.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/spacex',
+    problemMsg: "RocketError: SPACEX_WORKHORSE='STARSHIP' wrong. Starship is under development. Main orbital rocket differs.",
+    problemHint: "SpaceX's main workhorse orbital rocket, used for most launches since 2010. Two words — give the first.",
+    lines: [
+`<span class="cmt"># SpaceX rocket fleet constants</span>`,
+``,
+`<span class="cmt"># BUG: wrong SpaceX primary orbital rocket</span>`,
+`<span class="cmt"># Starship is SpaceX's next-gen rocket, still in testing.</span>`,
+`<span class="cmt"># The current workhorse has flown hundreds of missions.</span>`,
+`<span class="cmt"># Name: ___ 9 (a bird of prey + a number). First word: ???</span>`,
+`<span class="vr">SPACEX_WORKHORSE</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">STARSHIP</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'falcon',
+  },
+  {
+    file: 'src/meta/vr.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/meta',
+    problemMsg: "ProductError: META_VR_HEADSET='VIVE' wrong. Vive is made by HTC. Meta's own headset is different.",
+    problemHint: "Meta (formerly Facebook) makes its own VR headset. What is it called? (one word — a spiritual concept)",
+    lines: [
+`<span class="cmt">// VR headset product constants</span>`,
+``,
+`<span class="cmt">// BUG: wrong Meta VR headset name</span>`,
+`<span class="cmt">// HTC makes the Vive. Sony makes PlayStation VR.</span>`,
+`<span class="cmt">// Meta's own headset line is named after a spiritual concept:</span>`,
+`<span class="cmt">// the state of being on an important mission. One word: ???</span>`,
+`<span class="kw">const</span> <span class="type">META_VR_HEADSET</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">VIVE</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'quest',
+  },
+  {
+    file: 'src/bitcoin/peak.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/bitcoin',
+    problemMsg: "CryptoError: BTC_ATH_2024=50000 wrong. Bitcoin reached a much higher price in March 2024.",
+    problemHint: "Bitcoin hit its all-time high in March 2024. Approximately how many USD? (round to nearest 1000)",
+    lines: [
+`<span class="cmt">// Bitcoin price constants — market data</span>`,
+`<span class="kw">package</span> <span class="vr">crypto</span>`,
+``,
+`<span class="cmt">// BUG: wrong Bitcoin all-time high (2024)</span>`,
+`<span class="cmt">// Bitcoin peaked in March 2024, breaking its 2021 record.</span>`,
+`<span class="cmt">// Reached approximately $7?000 USD at peak.</span>`,
+`<span class="kw">const</span> <span class="type">BTC_ATH_2024</span> <span class="op">=</span> <span class="bug-val" id="bugSpan">50000</span>`
+    ],
+    bugLine: 6,
+    answer: '73000',
+  },
+  {
+    file: 'src/stripe/founders.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/stripe',
+    problemMsg: "FounderError: STRIPE_FOUNDERS_NATIONALITY='AMERICAN' wrong. Patrick and John Collison are not American.",
+    problemHint: "Stripe was founded by brothers Patrick and John Collison. What country are they from?",
+    lines: [
+`<span class="cmt"># Fintech founder nationality constants</span>`,
+`<span class="kw">module</span> <span class="type">Fintech</span>`,
+`<span class="cmt">  # BUG: wrong nationality for Stripe founders</span>`,
+`<span class="cmt">  # Patrick and John Collison founded Stripe in 2010.</span>`,
+`<span class="cmt">  # They grew up in County Tipperary.</span>`,
+`<span class="cmt">  # Not American — they emigrated. Nationality: ???</span>`,
+`  <span class="type">STRIPE_FOUNDERS_NATIONALITY</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">AMERICAN</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'irish',
+  },
+  {
+    file: 'src/reddit/mascot.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/reddit',
+    problemMsg: "BrandError: REDDIT_MASCOT='CLIPPY' wrong. Clippy is Microsoft's assistant. Reddit has its own alien.",
+    problemHint: "Reddit's alien mascot has a name. It's a little orange alien with antenna. What is its name?",
+    lines: [
+`<span class="cmt"># Social media mascot constants</span>`,
+``,
+`<span class="cmt"># BUG: wrong Reddit mascot name</span>`,
+`<span class="cmt"># Reddit's logo is a small orange alien with antenna.</span>`,
+`<span class="cmt"># Created in 2005. Reddit calls it their mascot.</span>`,
+`<span class="cmt"># Its name rhymes with "who" — what is it?</span>`,
+`<span class="vr">REDDIT_MASCOT</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">CLIPPY</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'snoo',
+  },
+  {
+    file: 'src/meme/keyboard.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/meme',
+    problemMsg: "MemeError: KEYBOARD_CAT_INSTRUMENT='GUITAR' wrong. The famous 2007 viral cat plays something else.",
+    problemHint: "The famous 2007 viral video 'Keyboard Cat' shows a cat appearing to play what instrument?",
+    lines: [
+`<span class="cmt">// Internet meme reference constants</span>`,
+``,
+`<span class="cmt">// BUG: wrong instrument for Keyboard Cat</span>`,
+`<span class="cmt">// One of the earliest viral internet memes (2007).</span>`,
+`<span class="cmt">// A cat in a blue shirt appears to play a specific instrument.</span>`,
+`<span class="cmt">// Clue: it's in the name. "Keyboard ___"</span>`,
+`<span class="kw">const</span> <span class="type">KEYBOARD_CAT_INSTRUMENT</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">GUITAR</span><span class="str">"</span>;`
+    ],
+    bugLine: 6,
+    answer: 'keyboard',
+  },
+  {
+    file: 'src/wordle/origin.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/wordle',
+    problemMsg: "GameError: WORDLE_CREATOR='DUOLINGO' wrong. Wordle was made by one person as a gift for his partner.",
+    problemHint: "Wordle was created by Josh ___,  as a gift for his partner, and went viral in 2021. Surname?",
+    lines: [
+`<span class="cmt">// Wordle game origin constants</span>`,
+`<span class="kw">package</span> <span class="vr">games</span>`,
+``,
+`<span class="cmt">// BUG: wrong Wordle creator</span>`,
+`<span class="cmt">// Wordle went viral in late 2021 / early 2022.</span>`,
+`<span class="cmt">// Created by a software engineer as a gift for his partner.</span>`,
+`<span class="cmt">// First name: Josh. Surname sounds like "Wardle".</span>`,
+`<span class="kw">const</span> <span class="type">WORDLE_CREATOR</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">DUOLINGO</span><span class="str">"</span>`
+    ],
+    bugLine: 7,
+    answer: 'wardle',
+  },
+  {
+    file: 'src/games/minecraft.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/games',
+    problemMsg: "GameError: MINECRAFT_CREATOR='VALVE' wrong. Valve makes Steam, TF2, Half-Life. Minecraft is different.",
+    problemHint: "Minecraft was originally created by Markus 'Notch' Persson. What company did he found? (one word)",
+    lines: [
+`<span class="cmt"># Video game studio constants</span>`,
+`<span class="kw">module</span> <span class="type">Gaming</span>`,
+`<span class="cmt">  # BUG: wrong studio that made Minecraft</span>`,
+`<span class="cmt">  # Valve: Steam, Half-Life, Portal, TF2.</span>`,
+`<span class="cmt">  # Minecraft was created by Markus "Notch" Persson</span>`,
+`<span class="cmt">  # in 2009 under his studio "M_____". What's the name?</span>`,
+`  <span class="type">MINECRAFT_STUDIO</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">VALVE</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'mojang',
+  },
+  {
+    file: 'src/lang/emoji.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/lang',
+    problemMsg: "EmojiError: MOST_USED_EMOJI='😂' is wrong according to 2023 Unicode data. Different emoji topped the charts.",
+    problemHint: "According to Unicode's 2023 data, what is the most used emoji in the world? (type the emoji or its name)",
+    lines: [
+`<span class="cmt"># Unicode emoji usage statistics</span>`,
+``,
+`<span class="cmt"># BUG: most-used emoji is wrong per 2023 Unicode data</span>`,
+`<span class="cmt"># 😂 (Face with Tears of Joy) was #1 for years.</span>`,
+`<span class="cmt"># But in 2023, it was overtaken by a red heart emoji.</span>`,
+`<span class="cmt"># The most used emoji is now simply: ???</span>`,
+`<span class="vr">MOST_USED_EMOJI</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">😂</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: '❤️',
+  },
+  {
+    file: 'src/math/euler.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/math',
+    problemMsg: "MathError: EULER_NUMBER=2.5 wrong. Euler's number e is approximately 2.718.",
+    problemHint: "What is Euler's number (e) rounded to 3 decimal places? Used as the base of natural logarithms.",
+    lines: [
+`<span class="cmt"># Mathematical constants reference</span>`,
+``,
+`<span class="vr">PI</span>           <span class="op">=</span> <span class="num">3.14159</span>`,
+`<span class="cmt"># BUG: Euler's number is wrong below</span>`,
+`<span class="cmt"># e is the base of natural logarithms.</span>`,
+`<span class="cmt"># Value: approximately 2.???  (first 3 decimal places: 718)</span>`,
+`<span class="vr">EULER_NUMBER</span> <span class="op">=</span> <span class="bug-val" id="bugSpan">2.5</span>`
+    ],
+    bugLine: 6,
+    answer: '2.718',
+  },
+  {
+    file: 'src/math/binary.ts',
+    lang: 'TypeScript',
+    icon: 'ts',
+    folder: 'src/math',
+    problemMsg: "BinaryError: BYTE_BITS=10 wrong. A byte is a fixed number of bits — check your CS basics.",
+    problemHint: "How many bits are in one byte? This is fundamental to all computing.",
+    lines: [
+`<span class="cmt">// Binary and bitwise constants</span>`,
+``,
+`<span class="kw">const</span> <span class="vr">KILOBYTE_BYTES</span> <span class="op">=</span> <span class="num">1024</span>;`,
+`<span class="cmt">// BUG: how many bits in a byte?</span>`,
+`<span class="cmt">// Every computer storage unit starts here:</span>`,
+`<span class="cmt">// 1 byte = ??? bits. 1 kilobyte = 1024 bytes.</span>`,
+`<span class="kw">const</span> <span class="type">BYTE_BITS</span> <span class="op">=</span> <span class="bug-val" id="bugSpan">10</span>;`
+    ],
+    bugLine: 6,
+    answer: '8',
+  },
+  {
+    file: 'src/math/prime_large.go',
+    lang: 'Go',
+    icon: 'go',
+    folder: 'src/math',
+    problemMsg: "PrimeError: PRIME_AFTER_89=91 wrong. 91 = 7 × 13. Not prime. Find the actual next prime.",
+    problemHint: "What is the next prime number after 89? (91 is wrong — 91 = 7 × 13)",
+    lines: [
+`<span class="cmt">// Prime number sequence</span>`,
+`<span class="kw">package</span> <span class="vr">math</span>`,
+``,
+`<span class="cmt">// BUG: wrong prime after 89</span>`,
+`<span class="cmt">// 91 = 7 × 13, so it's NOT prime.</span>`,
+`<span class="cmt">// The next prime after 89 is: ???</span>`,
+`<span class="kw">const</span> <span class="type">PRIME_AFTER_89</span> <span class="op">=</span> <span class="bug-val" id="bugSpan">91</span>`
+    ],
+    bugLine: 6,
+    answer: '97',
+  },
+  {
+    file: 'src/math/triangle.rb',
+    lang: 'Ruby',
+    icon: 'rb',
+    folder: 'src/math',
+    problemMsg: "GeomError: TRIANGLE_ANGLES_SUM=180 is correct but type is wrong. It should be in degrees, not radians.",
+    problemHint: "The sum of interior angles in any triangle is 180 ___. What unit? (hint: not radians)",
+    lines: [
+`<span class="cmt"># Triangle geometry constants</span>`,
+`<span class="kw">module</span> <span class="type">Geometry</span>`,
+`<span class="cmt">  # BUG: angle unit is wrong</span>`,
+`<span class="cmt">  # A triangle's angles always sum to 180 units.</span>`,
+`<span class="cmt">  # Those units are not "radians" (π radians = 180 degrees)</span>`,
+`<span class="cmt">  # The everyday unit for angles is: ???</span>`,
+`  <span class="type">ANGLE_UNIT</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">RADIANS</span><span class="str">"</span>`,
+`<span class="kw">end</span>`
+    ],
+    bugLine: 6,
+    answer: 'degrees',
+  },
+  {
+    file: 'src/stats/bell.py',
+    lang: 'Python',
+    icon: 'py',
+    folder: 'src/stats',
+    problemMsg: "StatError: BELL_CURVE_NAME='BINOMIAL' wrong. The bell-shaped probability curve is a different distribution.",
+    problemHint: "The classic bell-shaped probability distribution is called the ___ distribution. Not binomial.",
+    lines: [
+`<span class="cmt"># Statistics distribution constants</span>`,
+``,
+`<span class="cmt"># BUG: wrong distribution name for bell curve</span>`,
+`<span class="cmt"># Binomial is discrete (coin flips, etc.)</span>`,
+`<span class="cmt"># The BELL CURVE / Gaussian distribution is called:</span>`,
+`<span class="cmt"># the ___ distribution. Also called "Gaussian".</span>`,
+`<span class="vr">BELL_CURVE</span> <span class="op">=</span> <span class="str">"</span><span class="bug-val" id="bugSpan">BINOMIAL</span><span class="str">"</span>`
+    ],
+    bugLine: 6,
+    answer: 'normal',
+  },
+];
+
+// ── FILE ICON SVG ──
+function fileIconSVG(type) {
+  const icons = {
+    js: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="2" fill="#F0D040"/><text x="3" y="12" font-family="monospace" font-weight="700" font-size="8" fill="#222">JS</text></svg>`,
+    ts: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="2" fill="#3178C6"/><text x="2.5" y="12" font-family="monospace" font-weight="700" font-size="8" fill="#fff">TS</text></svg>`,
+    py: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="2" fill="#3572A5"/><text x="4.5" y="12" font-family="monospace" font-weight="700" font-size="9" fill="#FFD43B">P</text></svg>`,
+    rb: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="2" fill="#CC342D"/><path d="M8 4L12 8L8 12L4 8Z" fill="white" opacity="0.9"/></svg>`,
+    go: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="2" fill="#00ACD7"/><text x="2" y="12" font-family="monospace" font-weight="700" font-size="8" fill="#fff">Go</text></svg>`,
+  };
+  return icons[type] || icons.js;
+}
+
+// ── GAME STATE ──
+let puzzleOrder = [];
+let currentIdx = 0;
+let fixedCount = 0;
+let wrongCount = 0;
+let activeInput = null;
+let terminalLines = [];
+let panelMode = 'terminal';
+
+// ── INIT ──
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function dismissWelcome() {
+  document.getElementById('welcomeOverlay').classList.add('hidden');
+  focusInp();
+}
+
+const SESSION_SIZE = 10;
+let SESSION = [...Array(Math.min(10, PUZZLES.length)).keys()]; // default, overwritten by startGame
+
+function startGame() {
+  // Pick SESSION_SIZE random puzzles from the full pool
+  const allIdx = shuffle([...Array(PUZZLES.length).keys()]);
+  SESSION = allIdx.slice(0, SESSION_SIZE);
+  puzzleOrder = [...Array(SESSION_SIZE).keys()]; // 0..9 mapped through SESSION
+  currentIdx = 0;
+  fixedCount = 0;
+  wrongCount = 0;
+  terminalLines = [];
+  buildSidebar();
+  loadPuzzle(0);
+  // Update welcome modal counts
+  const wmc = document.getElementById('wmCount');
+  const wml = document.getElementById('wmLevels');
+  if (wmc) wmc.textContent = SESSION_SIZE;
+  if (wml) wml.textContent = `${PUZZLES.length}-puzzle pool · ${SESSION_SIZE} per session`;
+  termPrint('<span class="term-prompt">project-alpha@dev</span><span class="pl">:~$</span> <span class="pl">code .</span>', 0);
+  termPrint('<span class="term-dim">Opening workspace...</span>', 200);
+  termPrint('<span class="term-dim">Found ' + PUZZLES.length + ' files with errors. Start debugging.</span>', 500);
+}
+
+// ── SIDEBAR ──
+function buildSidebar() {
+  const tree = document.getElementById('sbTree');
+  // Group files by folder
+  const folders = {};
+  PUZZLES.forEach((p, i) => {
+    if (!folders[p.folder]) folders[p.folder] = [];
+    folders[p.folder].push({...p, origIdx: i});
+  });
+
+  let html = '<div class="sb-folder">▾ 📁 project-alpha</div>';
+  const seen = {};
+  puzzleOrder.forEach((pi, si) => {
+    const p = PUZZLES[SESSION[pi]];
+    const parts = p.folder.split('/');
+    let indent = 1;
+    parts.forEach((part, depth) => {
+      const key = parts.slice(0, depth+1).join('/');
+      if (!seen[key]) {
+        seen[key] = true;
+        html += `<div class="sb-folder" style="padding-left:${12 + depth*16}px">▾ 📁 ${part}</div>`;
+      }
+    });
+    const depth = parts.length;
+    html += `<div class="sb-file" id="sbf-${pi}" style="padding-left:${28 + (depth-1)*16}px" onclick="jumpTo(${si})">
+      <span class="sb-icon">${p.icon}</span>${p.file.split('/').pop()}
+      <span class="sb-err" id="sberr-${pi}">⚠</span>
+    </div>`;
+  });
+
+  tree.innerHTML = html;
+}
+
+function jumpTo(si) {
+  currentIdx = si;
+  loadPuzzle(si);
+}
+
+function updateSidebar(si, fixed) {
+  const el = document.getElementById('sberr-' + si);
+  if (el) {
+    el.textContent = fixed ? '✓' : '⚠';
+    el.className = fixed ? 'sb-ok' : 'sb-err';
+  }
+  const file = document.getElementById('sbf-' + si);
+  if (file) file.style.color = fixed ? '#4ec9b0' : '';
+}
+
+// ── TABS ──
+function buildTabs() {
+  const tabBar = document.getElementById('tabBar');
+  tabBar.innerHTML = '';
+  const shown = new Set();
+
+  // Show up to 5 tabs around current
+  const start = Math.max(0, currentIdx - 2);
+  const end = Math.min(puzzleOrder.length, start + 5);
+
+  for (let si = start; si < end; si++) {
+    const pi = puzzleOrder[si];
+    const p = PUZZLES[SESSION[pi]];
+    const fname = p.file.split('/').pop();
+    const isActive = si === currentIdx;
+    const isFixed = document.getElementById('sberr-' + si)?.textContent === '✓';
+    const statusIcon = isFixed
+      ? '<span class="tab-ok">✓</span>'
+      : '<span class="tab-err">●</span>';
+
+    tabBar.innerHTML += `
+      <div class="tab ${isActive ? 'active' : ''}" onclick="jumpTo(${si})">
+        <span style="display:flex;align-items:center;margin-right:2px">${fileIconSVG(p.icon)}</span>
+        ${fname}
+        ${statusIcon}
+      </div>`;
+  }
+}
+
+// ── LOAD PUZZLE ──
+function loadPuzzle(si) {
+  const pi = puzzleOrder[si];
+  const puzzle = PUZZLES[SESSION[pi]];
+
+  // Update title
+  document.getElementById('tbTitle').innerHTML = `<b>${puzzle.file}</b> — Visual Studio Code`;
+
+  // Update status bar lang
+  document.getElementById('sbLang').textContent = puzzle.lang;
+
+  // Render code
+  renderCode(puzzle);
+
+  // Update problems panel
+  renderProblems(puzzle);
+
+  // Update tabs
+  buildTabs();
+
+  // Active sidebar file
+  document.querySelectorAll('.sb-file').forEach(el => el.classList.remove('active'));
+  const sf = document.getElementById('sbf-' + currentIdx);
+  if (sf) sf.classList.add('active');
+
+  // Update error count in status bar
+  const remaining = PUZZLES.length - fixedCount;
+  document.getElementById('sbErrNum').textContent = remaining;
+
+  // Scroll editor to top
+  document.getElementById('editorEl').scrollTop = 0;
+
+  activeInput = null;
+  showPanel('terminal');
+}
+
+// ── RENDER CODE ──
+function renderCode(puzzle) {
+  const container = document.getElementById('codeLines');
+  const miniContainer = document.getElementById('miniLines');
+  let html = '';
+  let miniHtml = '';
+
+  puzzle.lines.forEach((line, i) => {
+    const lineNum = i + 1;
+    const isBug = i === puzzle.bugLine;
+    const cls = isBug ? 'code-line bug-line' : 'code-line';
+    html += `<div class="${cls}" id="cl-${i}"><span class="ln">${lineNum}</span><span class="lc">${line}</span></div>`;
+
+    // Minimap
+    if (line === '') {
+      miniHtml += `<div class="mini-ln"></div>`;
+    } else if (line.includes('cmt')) {
+      miniHtml += `<div class="mini-ln cmt-mini" style="width:${30+Math.random()*30}%"></div>`;
+    } else if (isBug) {
+      miniHtml += `<div class="mini-ln bug-mini" style="width:${60+Math.random()*20}%"></div>`;
+    } else {
+      miniHtml += `<div class="mini-ln code-mini" style="width:${40+Math.random()*40}%"></div>`;
+    }
+  });
+
+  container.innerHTML = html;
+  miniContainer.innerHTML = miniHtml;
+
+  // Attach click to bug span
+  const bugSpan = document.getElementById('bugSpan');
+  if (bugSpan) {
+    bugSpan.onclick = () => activateBug(puzzle);
+  }
+}
+
+// ── ACTIVATE BUG ──
+function activateBug(puzzle) {
+  const bugSpan = document.getElementById('bugSpan');
+  if (!bugSpan || activeInput) return;
+
+  const currentVal = bugSpan.textContent;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'fix-input';
+  input.value = currentVal;
+  input.style.width = Math.max(60, currentVal.length * 9 + 20) + 'px';
+  activeInput = input;
+
+  bugSpan.replaceWith(input);
+  input.focus();
+  input.select();
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitFix(puzzle, input.value.trim());
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelFix(puzzle, currentVal);
+    }
+  });
+
+  input.addEventListener('blur', () => {
+    // Small delay to allow Enter to fire first
+    setTimeout(() => {
+      if (activeInput === input) cancelFix(puzzle, currentVal);
+    }, 120);
+  });
+
+  // Update formula/status bar
+  document.getElementById('stMode').textContent && null;
+  showPanel('terminal');
+  termPrint(`<span class="term-prompt">›</span> <span class="pl">Editing: ${puzzle.file}</span>`);
+}
+
+function cancelFix(puzzle, originalVal) {
+  const inp = activeInput;
+  if (!inp) return;
+  activeInput = null;
+  // Restore bug span
+  const newSpan = document.createElement('span');
+  newSpan.id = 'bugSpan';
+  newSpan.className = 'bug-val';
+  newSpan.textContent = originalVal;
+  newSpan.onclick = () => activateBug(puzzle);
+  inp.replaceWith(newSpan);
+}
+
+// ── SUBMIT FIX ──
+function submitFix(puzzle, value) {
+  if (!value) return;
+  activeInput = null;
+
+  const isCorrect = value.toLowerCase().trim() === puzzle.answer.toLowerCase();
+
+  if (isCorrect) {
+    // Replace input with fixed green value
+    const inp = document.querySelector('.fix-input');
+    if (inp) {
+      const fixedSpan = document.createElement('span');
+      fixedSpan.style.color = '#4ec9b0';
+      fixedSpan.textContent = value;
+      inp.replaceWith(fixedSpan);
+    }
+
+    // Remove bug-line highlight
+    const bugLine = document.getElementById('cl-' + puzzle.bugLine);
+    if (bugLine) bugLine.classList.remove('bug-line');
+
+    fixedCount++;
+    const si = currentIdx;
+    updateSidebar(si, true);
+    updateScoreBar();
+    document.getElementById('sbErrNum').textContent = PUZZLES.length - fixedCount;
+
+    // Run fake tests in terminal
+    runFakeTests(puzzle, true, () => {
+      if (fixedCount === PUZZLES.length) {
+        setTimeout(() => showComplete(), 800);
+      } else {
+        // Advance to next unfixed puzzle
+        let next = (currentIdx + 1) % puzzleOrder.length;
+        let tries = 0;
+        while (tries < puzzleOrder.length) {
+          const npi = puzzleOrder[next];
+          if (document.getElementById('sberr-' + next)?.textContent !== '✓') break;
+          next = (next + 1) % puzzleOrder.length;
+          tries++;
+        }
+        setTimeout(() => {
+          currentIdx = next;
+          fadeIn(() => loadPuzzle(next));
+        }, 1200);
+      }
+    });
+  } else {
+    wrongCount++;
+    // Put wrong value back as bug span
+    const inp = document.querySelector('.fix-input');
+    if (inp) {
+      const newSpan = document.createElement('span');
+      newSpan.id = 'bugSpan';
+      newSpan.className = 'bug-val';
+      newSpan.textContent = value;
+      newSpan.onclick = () => activateBug(puzzle);
+      inp.replaceWith(newSpan);
+    }
+    runFakeTests(puzzle, false, null);
+  }
+
+  buildTabs();
+}
+
+// ── FAKE TEST RUNNER ──
+function runFakeTests(puzzle, pass, callback) {
+  showPanel('terminal');
+  const fname = puzzle.file.split('/').pop();
+  const testFile = fname.replace(/\.(js|ts|py|rb|go)$/, '.test.$1').replace('.test.test', '.test');
+
+  const lines = pass ? [
+    `<span class="term-prompt">›</span> <span class="pl">Running tests for ${puzzle.file}...</span>`,
+    `<span class="term-dim"></span>`,
+    `<span class="pl">  PASS  ${puzzle.file.replace(/\.\w+$/, '.test$&')}</span>`,
+    `<span class="term-pass">  ✓ ${puzzle.problemMsg.split(':')[0]}: fix validated (${4 + Math.floor(Math.random()*12)}ms)</span>`,
+    `<span class="term-dim"></span>`,
+    `<span class="term-pass">Test Suites: 1 passed, 1 total</span>`,
+    `<span class="term-pass">Tests:       1 passed, 1 total</span>`,
+    `<span class="term-score">  ✔ Bug fixed! (${fixedCount}/${PUZZLES.length})</span>`,
+  ] : [
+    `<span class="term-prompt">›</span> <span class="pl">Running tests for ${puzzle.file}...</span>`,
+    `<span class="term-dim"></span>`,
+    `<span class="pl">  FAIL  ${puzzle.file.replace(/\.\w+$/, '.test$&')}</span>`,
+    `<span class="term-fail">  ✕ ${puzzle.problemMsg.split(':')[0]}: fix rejected (${3 + Math.floor(Math.random()*8)}ms)</span>`,
+    `<span class="term-dim">    Expected: <correct answer></span>`,
+    `<span class="term-fail">    Received: incorrect value</span>`,
+    `<span class="term-dim"></span>`,
+    `<span class="term-fail">Tests:  1 failed, 1 total</span>`,
+  ];
+
+  let delay = 0;
+  lines.forEach((line, i) => {
+    delay += i === 0 ? 0 : (i < 2 ? 80 : 120);
+    termPrint(line, delay);
+  });
+
+  if (callback) {
+    setTimeout(callback, delay + 200);
+  }
+}
+
+// ── TERMINAL ──
+function termPrint(html, delay = 0) {
+  if (delay === 0) {
+    appendTermLine(html);
+  } else {
+    setTimeout(() => appendTermLine(html), delay);
+  }
+}
+
+function appendTermLine(html) {
+  const panel = document.getElementById('panelTerminal');
+  const div = document.createElement('div');
+  div.className = 'term-line';
+  div.innerHTML = html;
+  panel.appendChild(div);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+function clearTerminal() {
+  document.getElementById('panelTerminal').innerHTML = '';
+}
+
+// ── PROBLEMS PANEL ──
+function renderProblems(puzzle) {
+  const panel = document.getElementById('panelProblems');
+  panel.innerHTML = `
+    <div class="prob-item">
+      <div class="prob-icon">✕</div>
+      <div>
+        <div class="prob-msg">${puzzle.problemMsg}</div>
+        <div class="prob-loc">${puzzle.file} · Line ${puzzle.bugLine + 1}</div>
+        <div class="prob-hint">💡 Hint: ${puzzle.problemHint}</div>
+      </div>
+    </div>`;
+  document.getElementById('probCount').textContent = '1';
+}
+
+function showPanel(which) {
+  panelMode = which;
+  document.getElementById('panelProblems').style.display = which === 'problems' ? '' : 'none';
+  document.getElementById('panelTerminal').style.display = which === 'terminal' ? '' : 'none';
+  document.getElementById('ptProblems').classList.toggle('active', which === 'problems');
+  document.getElementById('ptTerminal').classList.toggle('active', which === 'terminal');
+}
+
+// ── SCORE BAR ──
+function updateScoreBar() {
+  const pct = Math.round(fixedCount / PUZZLES.length * 100);
+  document.getElementById('scoreBar').textContent = `✔ ${fixedCount} / ${PUZZLES.length} fixed  (${pct}%)`;
+  // Change status bar colour when all done
+  if (fixedCount === PUZZLES.length) {
+    document.getElementById('statusbar').style.background = '#16825d';
+  }
+}
+
+// ── FADE TRANSITION ──
+function fadeIn(cb) {
+  const wrap = document.getElementById('editorWrap');
+  wrap.classList.add('fading');
+  setTimeout(() => {
+    cb();
+    wrap.classList.remove('fading');
+    wrap.classList.add('fade-in');
+    setTimeout(() => wrap.classList.remove('fade-in'), 300);
+  }, 200);
+}
+
+// ── COMPLETE ──
+function showComplete() {
+  const accuracy = Math.round((PUZZLES.length / (PUZZLES.length + wrongCount)) * 100);
+  const grade = wrongCount === 0 ? '⭐ Perfect' : accuracy >= 80 ? '✔ Great' : accuracy >= 60 ? '~ Good' : '✕ Keep practising';
+  document.getElementById('modalScore').textContent = `${grade}  ·  ${PUZZLES.length}/${PUZZLES.length} fixed`;
+  document.getElementById('modalMsg').textContent =
+    wrongCount === 0
+      ? 'Flawless debugging session. Zero wrong attempts.'
+      : `Completed with ${wrongCount} wrong attempt${wrongCount === 1 ? '' : 's'}. Accuracy: ${accuracy}%`;
+  document.getElementById('modalSub').textContent =
+    `All ${PUZZLES.length} files in project-alpha are now error-free. Ready to commit and push.`;
+  document.getElementById('modalBg').classList.add('show');
+  document.getElementById('sbErrNum').textContent = '0';
+}
+
+function restartGame() {
+  document.getElementById('modalBg').classList.remove('show');
+  document.getElementById('panelTerminal').innerHTML = '';
+  document.getElementById('statusbar').style.background = '';
+  document.getElementById('welcomeOverlay').classList.remove('hidden');
+  startGame();
+}
+
+function focusInp() { document.getElementById("hiddenInp").focus(); }
+
+// ── START ──
+startGame();
+</script>
+</body>
+</html>
