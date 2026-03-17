@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documents — File Explorer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;}
+:root{
+  --bg:#f3f3f3;--white:#ffffff;--border:#e0e0e0;--border-dark:#c8c8c8;
+  --text:#1a1a1a;--text-dim:#555;--text-dimmer:#888;
+  --accent:#0078d4;--sel-bg:#cce8ff;--sel-border:#99d1ff;
+  --hover-bg:#e5f3ff;--ribbon-bg:#ffffff;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);
+  font-family:'Segoe UI Variable','Segoe UI',system-ui,sans-serif;
+  font-size:12px;color:var(--text);}
+.window{width:100vw;height:100vh;display:flex;flex-direction:column;background:var(--bg);}
+
+/* TITLE BAR */
+.titlebar{height:32px;background:var(--bg);display:flex;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0;}
+.tb-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tb-qs{display:flex;align-items:center;padding:0 4px;gap:1px;}
+.tb-q{width:28px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer;color:var(--text-dim);}
+.tb-q:hover{background:rgba(0,0,0,0.06);}
+.tb-title{flex:1;text-align:center;font-size:12px;color:var(--text-dim);pointer-events:none;}
+.tb-controls{display:flex;margin-left:auto;}
+.tb-btn{width:46px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);}
+.tb-btn:hover{background:rgba(0,0,0,0.06);}
+.tb-btn.close:hover{background:#c42b1c;color:white;}
+
+/* RIBBON */
+.ribbon-tabs{height:28px;background:white;display:flex;align-items:flex-end;padding:0 4px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.rtab{padding:5px 16px 4px;font-size:12px;color:var(--text-dim);cursor:pointer;border-radius:4px 4px 0 0;border:1px solid transparent;border-bottom:none;}
+.rtab.active{background:white;color:var(--text);border-color:var(--border);border-bottom-color:white;margin-bottom:-1px;}
+.rtab:hover:not(.active){background:rgba(0,0,0,0.04);}
+.ribbon{background:white;border-bottom:1px solid var(--border);padding:4px 8px;display:flex;align-items:center;gap:2px;flex-shrink:0;}
+.rgroup{display:flex;align-items:center;gap:1px;padding:0 6px;border-right:1px solid var(--border);}
+.rgroup:last-child{border-right:none;}
+.rb-sm{display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px;color:var(--text-dim);height:22px;white-space:nowrap;}
+.rb-sm:hover{background:var(--hover-bg);}
+.rb-sm svg{width:14px;height:14px;flex-shrink:0;}
+.rb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:3px 6px;border-radius:4px;cursor:pointer;font-size:10px;color:var(--text-dim);min-width:40px;text-align:center;}
+.rb:hover{background:var(--hover-bg);}
+.rb svg{width:18px;height:18px;}
+
+/* ADDRESS BAR */
+.addrbar{height:34px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:0 10px;flex-shrink:0;}
+.nav-btn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer;color:var(--text-dim);}
+.nav-btn:hover{background:rgba(0,0,0,0.06);}
+.nav-btn.disabled{opacity:0.3;cursor:default;pointer-events:none;}
+.addr-box{flex:1;height:26px;background:#f5f5f5;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;padding:0 10px;gap:4px;font-size:12px;}
+.addr-crumb{display:flex;align-items:center;gap:3px;}
+.addr-sep{color:var(--text-dimmer);font-size:10px;margin:0 1px;}
+.addr-crumb span:last-child{font-weight:600;color:var(--text);}
+.addr-crumb span:not(:last-child){color:var(--text-dim);}
+.search-box{width:180px;height:26px;background:#f5f5f5;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;padding:0 8px;gap:5px;color:var(--text-dimmer);font-size:11px;}
+.search-box svg{width:12px;height:12px;flex-shrink:0;}
+
+/* LAYOUT */
+.main{flex:1;display:flex;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:220px;flex-shrink:0;background:var(--bg);border-right:1px solid var(--border);overflow-y:auto;padding:8px 0;}
+.sidebar::-webkit-scrollbar{width:4px;}
+.sidebar::-webkit-scrollbar-thumb{background:#c8c8c8;border-radius:2px;}
+.sb-label{padding:6px 12px 3px;font-size:11px;font-weight:600;color:var(--text-dimmer);}
+.sb-item{display:flex;align-items:center;gap:7px;padding:3px 10px 3px 18px;cursor:pointer;border-radius:4px;margin:0 4px;font-size:12px;color:var(--text-dim);height:26px;}
+.sb-item:hover{background:var(--hover-bg);}
+.sb-item.active{background:var(--sel-bg);color:var(--text);font-weight:500;}
+.sb-item svg{width:14px;height:14px;flex-shrink:0;}
+.sb-pin{margin-left:auto;color:#cca800;font-size:9px;}
+
+/* FILE AREA */
+.filearea{flex:1;overflow:auto;padding:0;background:white;}
+.filearea::-webkit-scrollbar{width:8px;}
+.filearea::-webkit-scrollbar-thumb{background:#c8c8c8;border-radius:4px;}
+
+/* COLUMN HEADERS */
+.col-headers{display:grid;grid-template-columns:2fr 1.2fr 1fr 0.7fr;border-bottom:1px solid var(--border);background:white;position:sticky;top:0;z-index:2;}
+.col-h{font-size:11px;color:var(--text-dim);padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:3px;border-right:1px solid var(--border);}
+.col-h:last-child{border-right:none;}
+.col-h:hover{background:rgba(0,0,0,0.03);}
+.col-h.sorted{color:var(--accent);}
+
+/* FILE ROWS */
+.file-list{padding:2px 0;}
+.file-row{display:grid;grid-template-columns:2fr 1.2fr 1fr 0.7fr;align-items:center;height:28px;padding:0;border-radius:0;cursor:default;border-left:3px solid transparent;}
+.file-row:hover{background:var(--hover-bg);}
+.file-row.selected{background:var(--sel-bg);border-left-color:var(--accent);}
+.file-row.game:hover{cursor:pointer;}
+.file-col{padding:0 10px;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.file-col.dim{font-size:11px;color:var(--text-dim);}
+.file-col.dimmer{font-size:11px;color:var(--text-dimmer);}
+.file-col.right{text-align:right;}
+.file-name-cell{display:flex;align-items:center;gap:8px;padding:0 6px 0 10px;}
+.fi-badge{width:16px;height:16px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:white;flex-shrink:0;font-family:Georgia,serif;}
+.fi-word{background:#185abd;}
+.fi-excel{background:#107c41;}
+.fi-pdf{background:#cc0000;}
+.fi-ppt{background:#c43e1c;}
+.fi-vscode{background:#007acc;}
+.fi-folder{background:none;}
+.fname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;}
+.game-badge{font-size:9px;background:var(--accent);color:white;padding:1px 5px;border-radius:3px;margin-left:6px;flex-shrink:0;font-weight:600;opacity:0.85;}
+
+/* DETAILS PANE */
+.details-pane{width:240px;flex-shrink:0;border-left:1px solid var(--border);background:#fafafa;display:flex;flex-direction:column;}
+.dp-header{padding:10px 14px 8px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text-dimmer);text-transform:uppercase;letter-spacing:0.06em;}
+.dp-body{padding:14px;flex:1;overflow:auto;}
+.dp-icon-area{display:flex;justify-content:center;margin-bottom:12px;}
+.dp-big-icon{width:52px;height:52px;border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.dp-fname{text-align:center;font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.3;}
+.dp-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #ebebeb;font-size:11px;}
+.dp-row:last-child{border:none;}
+.dp-key{color:var(--text-dimmer);flex-shrink:0;margin-right:8px;}
+.dp-val{color:var(--text-dim);text-align:right;word-break:break-word;}
+.dp-empty{text-align:center;color:var(--text-dimmer);font-size:11px;padding:20px 0;line-height:1.7;}
+.dp-open-btn{display:block;width:100%;margin-top:16px;padding:7px 12px;background:var(--accent);color:white;border:none;border-radius:4px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;}
+.dp-open-btn:hover{background:#005fa3;}
+.dp-desc{font-size:11px;color:var(--text-dim);line-height:1.55;margin-top:10px;padding-top:10px;border-top:1px solid #ebebeb;}
+
+/* STATUS BAR */
+.statusbar{height:24px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 12px;font-size:11px;color:var(--text-dim);gap:12px;flex-shrink:0;}
+.sb-right{margin-left:auto;display:flex;gap:4px;}
+.view-btn{width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:3px;cursor:pointer;color:var(--text-dimmer);}
+.view-btn:hover{background:rgba(0,0,0,0.06);}
+.view-btn.active{color:var(--accent);}
+
+/* TOAST */
+.toast{position:fixed;bottom:36px;left:50%;transform:translateX(-50%);background:#323232;color:white;padding:8px 20px;border-radius:4px;font-size:12px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:100;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.3);}
+.toast.show{opacity:1;}
+
+/* row animation */
+@keyframes rowFade{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:none;}}
+.file-row{animation:rowFade 0.12s ease both;}
+</style>
+</head>
+<body>
+<div class="window">
+
+  <!-- TITLE BAR -->
+  <div class="titlebar">
+    <div class="tb-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M1 4a1 1 0 011-1h4l2 2h6a1 1 0 011 1v7a1 1 0 01-1 1H2a1 1 0 01-1-1z" fill="#FFD966" stroke="#E6B800" stroke-width="0.5"/>
+      </svg>
+    </div>
+    <div class="tb-qs">
+      <div class="tb-q"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 5.5a3.5 3.5 0 107 0 3.5 3.5 0 00-7 0z"/><line x1="5.5" y1="3.8" x2="5.5" y2="7.2"/><circle cx="5.5" cy="2.8" r="0.4" fill="currentColor" stroke="none"/></svg></div>
+      <div class="tb-q"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.5 5.5a4 4 0 106.9 2.7" stroke-linecap="round"/><path d="M1.5 2.5v3h3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <div class="tb-title">Work Tools — File Explorer</div>
+    <div class="tb-controls">
+      <div class="tb-btn"><svg width="10" height="1" viewBox="0 0 10 1"><rect width="10" height="1" fill="currentColor"/></svg></div>
+      <div class="tb-btn"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="9" height="9"/></svg></div>
+      <div class="tb-btn close"><svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.2"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg></div>
+    </div>
+  </div>
+
+  <!-- RIBBON TABS -->
+  <div class="ribbon-tabs">
+    <div class="rtab active">Home</div>
+    <div class="rtab">Share</div>
+    <div class="rtab">View</div>
+  </div>
+
+  <!-- RIBBON BODY -->
+  <div class="ribbon">
+    <div class="rgroup">
+      <div class="rb"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 4a1 1 0 011-1h4l2 2h6a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1z"/><path d="M6 11l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Pin to<br>Quick access</div>
+      <div class="rb"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 9h10M9 4v10" stroke-linecap="round"/></svg>New<br>folder</div>
+    </div>
+    <div class="rgroup">
+      <div class="rb-sm"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><line x1="4" y1="4" x2="12" y2="12" stroke-linecap="round"/><line x1="12" y1="4" x2="4" y2="12" stroke-linecap="round"/></svg>Cut</div>
+      <div class="rb-sm"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="5" y="2" width="9" height="11" rx="1"/><rect x="2" y="4" width="9" height="11" rx="1" fill="white"/></svg>Copy</div>
+      <div class="rb-sm"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>Paste</div>
+    </div>
+    <div class="rgroup">
+      <div class="rb-sm"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="3,3 13,3 13,13 3,13 3,3" /><line x1="6" y1="7" x2="10" y2="11" stroke-linecap="round"/><line x1="10" y1="7" x2="6" y2="11" stroke-linecap="round"/></svg>Delete</div>
+      <div class="rb-sm"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 11l2-2 6-6 2 2-6 6-2.5 0.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>Rename</div>
+    </div>
+    <div class="rgroup" style="margin-left:auto;">
+      <div class="rb-sm"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><line x1="2" y1="4" x2="14" y2="4" stroke-linecap="round"/><line x1="2" y1="8" x2="14" y2="8" stroke-linecap="round"/><line x1="2" y1="12" x2="10" y2="12" stroke-linecap="round"/></svg>Sort by</div>
+      <div class="rb-sm"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Layout</div>
+    </div>
+  </div>
+
+  <!-- ADDRESS BAR -->
+  <div class="addrbar">
+    <div class="nav-btn disabled"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.5 2L3.5 5l3 3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="nav-btn disabled"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2l3 3-3 3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="nav-btn disabled"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6.5l3-3 3 3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="addr-box">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="1.5" fill="#0078d4"/><rect x="2.5" y="2.5" width="4" height="4" rx="0.5" fill="white"/><rect x="7.5" y="2.5" width="4" height="4" rx="0.5" fill="white"/><rect x="2.5" y="7.5" width="4" height="4" rx="0.5" fill="white"/><rect x="7.5" y="7.5" width="4" height="4" rx="0.5" fill="white"/></svg>
+      <div class="addr-crumb">
+        <span>This PC</span><span class="addr-sep">›</span>
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 3.5a1 1 0 011-1h3l1.5 2H11a1 1 0 011 1v5a1 1 0 01-1 1H2a1 1 0 01-1-1z" fill="#FFD966" stroke="#E6B800" stroke-width="0.5"/></svg>
+        <span>Documents</span><span class="addr-sep">›</span>
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 3.5a1 1 0 011-1h3l1.5 2H11a1 1 0 011 1v5a1 1 0 01-1 1H2a1 1 0 01-1-1z" fill="#A8D8FF" stroke="#0078d4" stroke-width="0.5"/></svg>
+        <span>Work Tools</span>
+      </div>
+    </div>
+    <div class="search-box">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="5" cy="5" r="3.5"/><line x1="7.5" y1="7.5" x2="10.5" y2="10.5" stroke-linecap="round"/></svg>
+      Search Work Tools
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="sidebar">
+      <div class="sb-label">Quick access</div>
+      <div class="sb-item"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5l1.8 3.8H13L9.6 7.8l1.3 3.9L7 9.4l-3.9 2.3 1.3-3.9L1 5.3h4.2z" fill="#FFD966" stroke="#E6A800" stroke-width="0.5"/></svg>Desktop <span class="sb-pin">★</span></div>
+      <div class="sb-item"><svg viewBox="0 0 14 14" fill="none"><path d="M1 4a1 1 0 011-1h3.5l1.5 2H12a1 1 0 011 1v5a1 1 0 01-1 1H2a1 1 0 01-1-1z" fill="#FFD966" stroke="#E6B800" stroke-width="0.5"/></svg>Documents <span class="sb-pin">★</span></div>
+      <div class="sb-item"><svg viewBox="0 0 14 14" fill="none"><path d="M1 4a1 1 0 011-1h3.5l1.5 2H12a1 1 0 011 1v5a1 1 0 01-1 1H2a1 1 0 01-1-1z" fill="#FFD966" stroke="#E6B800" stroke-width="0.5"/></svg>Downloads <span class="sb-pin">★</span></div>
+      <div class="sb-item active"><svg viewBox="0 0 14 14" fill="none"><path d="M1 4a1 1 0 011-1h3.5l1.5 2H12a1 1 0 011 1v5a1 1 0 01-1 1H2a1 1 0 01-1-1z" fill="#A8D8FF" stroke="#0078d4" stroke-width="0.5"/></svg>Work Tools</div>
+      <div class="sb-item"><svg viewBox="0 0 14 14" fill="none"><path d="M1 4a1 1 0 011-1h3.5l1.5 2H12a1 1 0 011 1v5a1 1 0 01-1 1H2a1 1 0 01-1-1z" fill="#FFD966" stroke="#E6B800" stroke-width="0.5"/></svg>Pictures <span class="sb-pin">★</span></div>
+      <div class="sb-label" style="margin-top:8px">This PC</div>
+      <div class="sb-item"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="8" rx="1" fill="#e4e4e4" stroke="#bbb" stroke-width="0.8"/><rect x="4" y="10" width="6" height="2" rx="0.5" fill="#ccc"/></svg>Local Disk (C:)</div>
+      <div class="sb-item"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="8" rx="1" fill="#dce8f5" stroke="#99b8d4" stroke-width="0.8"/><rect x="4" y="10" width="6" height="2" rx="0.5" fill="#ccc"/></svg>Network Drive (Z:)</div>
+      <div class="sb-label" style="margin-top:8px">Network</div>
+      <div class="sb-item"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4.5" r="2" fill="#dce8f5" stroke="#99b"/><circle cx="3.5" cy="10" r="1.5" fill="#dce8f5" stroke="#99b"/><circle cx="10.5" cy="10" r="1.5" fill="#dce8f5" stroke="#99b"/><line x1="7" y1="6.5" x2="3.5" y2="8.5" stroke="#aaa"/><line x1="7" y1="6.5" x2="10.5" y2="8.5" stroke="#aaa"/></svg>CORP-FS01</div>
+    </div>
+
+    <div class="filearea" id="fileArea" tabindex="0">
+      <div class="col-headers">
+        <div class="col-h sorted">Name <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.5 3l2.5 2.5L7 3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="col-h">Date modified</div>
+        <div class="col-h">Type</div>
+        <div class="col-h">Size</div>
+      </div>
+      <div class="file-list" id="fileList"></div>
+    </div>
+
+    <div class="details-pane">
+      <div class="dp-header">Details</div>
+      <div class="dp-body" id="detailsBody">
+        <div class="dp-empty">Select a file to<br>view its details</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span id="sbCount">8 items</span>
+    <span id="sbSel" style="color:var(--accent);display:none"></span>
+    <div class="sb-right">
+      <div class="view-btn active" title="Details"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2"><line x1="2" y1="3.5" x2="12" y2="3.5"/><line x1="2" y1="7" x2="12" y2="7"/><line x1="2" y1="10.5" x2="12" y2="10.5"/></svg></div>
+      <div class="view-btn" title="Icons"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const FILES = [
+  // folders first
+  { name:'Q3_Reports',           type:'folder', date:'14/11/2025 09:12', size:'—',      typeLabel:'File folder',                        game:false },
+  { name:'Meeting_Notes',        type:'folder', date:'18/11/2025 16:44', size:'—',      typeLabel:'File folder',                        game:false },
+  { name:'Templates',            type:'folder', date:'02/10/2025 11:30', size:'—',      typeLabel:'File folder',                        game:false },
+  { name:'Archive_2024',         type:'folder', date:'08/01/2025 08:55', size:'—',      typeLabel:'File folder',                        game:false },
+  // fake work files
+  { name:'Budget_Review_FY26',   type:'excel',  date:'19/11/2025 14:22', size:'128 KB', typeLabel:'Microsoft Excel Worksheet',          game:false, ext:'.xlsx' },
+  { name:'Project_Handover_Dec', type:'word',   date:'17/11/2025 10:08', size:'84 KB',  typeLabel:'Microsoft Word Document',            game:false, ext:'.docx' },
+  { name:'IT_Onboarding_Guide',  type:'pdf',    date:'05/09/2025 09:00', size:'2.1 MB', typeLabel:'Adobe PDF Document',                 game:false, ext:'.pdf'  },
+  { name:'Q4_Town_Hall_Slides',  type:'ppt',    date:'11/11/2025 17:45', size:'6.4 MB', typeLabel:'Microsoft PowerPoint Presentation',  game:false, ext:'.pptx' },
+  // THE GAMES
+  {
+    name:'TypeSpeed_Pro', type:'word', date:'20/11/2025 08:30', size:'312 KB',
+    typeLabel:'Microsoft Word Document', ext:'.docx', game:true,
+    href:'word-typing-test.html',
+    label:'Word Typing Test',
+    desc:'A typing speed test disguised as a Word document. Race the clock across 30 different British-English themed memos and letters. Tracks WPM and accuracy.',
+    detailExtra:{ Author:'Work Tools', Rating:'★★★★☆', 'Press': 'Double-click to play' }
+  },
+  {
+    name:'SalesTracker_Q4', type:'excel', date:'20/11/2025 08:31', size:'488 KB',
+    typeLabel:'Microsoft Excel Worksheet', ext:'.xlsx', game:true,
+    href:'excel-wordle.html',
+    label:'Excel Wordle',
+    desc:'Wordle hiding inside a product code validation spreadsheet. 8 rotating document themes, 900+ target words. The whole Excel chrome — ribbon, formula bar, tabs.',
+    detailExtra:{ Author:'Work Tools', Rating:'★★★★★', 'Press': 'Double-click to play' }
+  },
+  {
+    name:'project-alpha', type:'vscode', date:'20/11/2025 08:32', size:'—',
+    typeLabel:'File folder', game:true,
+    href:'vscode-puzzles.html',
+    label:'VS Code Bug Fixer',
+    desc:'Trivia and logic puzzles disguised as a VS Code debugging session. 69 questions across 5 languages — tech, pop culture, science, history. 10 per session.',
+    detailExtra:{ Author:'Work Tools', Rating:'★★★★★', 'Press': 'Double-click to play' }
+  },
+];
+
+function folderIcon(color='#FFD966', stroke='#E6B800'){
+  return `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 5a1 1 0 011-1h4l2 2h6a1 1 0 011 1v6a1 1 0 01-1 1H2a1 1 0 01-1-1z" fill="${color}" stroke="${stroke}" stroke-width="0.5"/></svg>`;
+}
+function fileIcon(type){
+  if(type==='folder') return folderIcon();
+  if(type==='vscode') return folderIcon('#A8D8FF','#0078d4');
+  const cls = type==='word'?'fi-word':type==='excel'?'fi-excel':type==='pdf'?'fi-pdf':'fi-ppt';
+  const lbl = type==='word'?'W':type==='excel'?'X':type==='pdf'?'PDF':'P';
+  return `<div class="fi-badge ${cls}">${lbl}</div>`;
+}
+function bigIcon(type){
+  const sz = 36;
+  if(type==='folder') return `<svg width="${sz}" height="${sz}" viewBox="0 0 36 36" fill="none"><path d="M2 10a2 2 0 012-2h9l4 5h15a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2z" fill="#FFD966" stroke="#E6B800" stroke-width="0.7"/></svg>`;
+  if(type==='vscode') return `<svg width="${sz}" height="${sz}" viewBox="0 0 36 36" fill="none"><path d="M2 10a2 2 0 012-2h9l4 5h15a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2z" fill="#A8D8FF" stroke="#0078d4" stroke-width="0.7"/></svg>`;
+  const bg = type==='word'?'#185abd':type==='excel'?'#107c41':type==='pdf'?'#cc0000':'#c43e1c';
+  const lbl = type==='word'?'W':type==='excel'?'X':type==='pdf'?'PDF':'P';
+  return `<div style="width:${sz}px;height:${sz}px;border-radius:4px;background:${bg};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;font-family:Georgia,serif;">${lbl}</div>`;
+}
+
+let selected = null;
+
+function renderFiles(){
+  const list = document.getElementById('fileList');
+  list.innerHTML = '';
+  FILES.forEach((f, i) => {
+    const row = document.createElement('div');
+    row.className = 'file-row' + (f.game?' game':'');
+    row.style.animationDelay = (i*0.025)+'s';
+
+    const displayName = f.ext ? f.name+f.ext : f.name;
+    const gameBadge = f.game ? '<span class="game-badge">GAME</span>' : '';
+
+    row.innerHTML = `
+      <div class="file-col file-name-cell">${fileIcon(f.type)}<span class="fname">${displayName}</span>${gameBadge}</div>
+      <div class="file-col dim">${f.date}</div>
+      <div class="file-col dimmer">${f.typeLabel}</div>
+      <div class="file-col dim right">${f.size}</div>`;
+
+    row.addEventListener('click', (e)=>{ e.stopPropagation(); selectFile(i, row); });
+    row.addEventListener('dblclick', ()=> openFile(f));
+    list.appendChild(row);
+  });
+  document.getElementById('sbCount').textContent = FILES.length + ' items';
+}
+
+function selectFile(i, row){
+  document.querySelectorAll('.file-row').forEach(r=>r.classList.remove('selected'));
+  row.classList.add('selected');
+  selected = i;
+  showDetails(FILES[i]);
+  const f = FILES[i];
+  const sel = document.getElementById('sbSel');
+  sel.style.display = '';
+  sel.textContent = (f.ext ? f.name+f.ext : f.name) + ' selected';
+}
+
+function showDetails(f){
+  const body = document.getElementById('detailsBody');
+  const displayName = f.ext ? f.name+f.ext : f.name;
+
+  let rows = '';
+  rows += `<div class="dp-row"><span class="dp-key">Type</span><span class="dp-val">${f.typeLabel}</span></div>`;
+  rows += `<div class="dp-row"><span class="dp-key">Modified</span><span class="dp-val">${f.date.split(' ')[0]}</span></div>`;
+  if(f.size !== '—') rows += `<div class="dp-row"><span class="dp-key">Size</span><span class="dp-val">${f.size}</span></div>`;
+  if(f.game && f.detailExtra){
+    Object.entries(f.detailExtra).forEach(([k,v])=>{
+      if(k&&v) rows += `<div class="dp-row"><span class="dp-key">${k}</span><span class="dp-val">${v}</span></div>`;
+    });
+  }
+
+  const openBtn = f.game
+    ? `<button class="dp-open-btn" onclick="openFile(FILES[${FILES.indexOf(f)}])">▶ Open "${f.label}"</button>`
+    : '';
+  const descBlock = f.game && f.desc
+    ? `<div class="dp-desc">${f.desc}</div>`
+    : '';
+
+  body.innerHTML = `
+    <div class="dp-icon-area">${bigIcon(f.type)}</div>
+    <div class="dp-fname">${displayName}</div>
+    ${rows}
+    ${openBtn}
+    ${descBlock}`;
+}
+
+function openFile(f){
+  if(!f.game){
+    toast('This file type is not supported for preview');
+    return;
+  }
+  toast('Opening ' + f.label + '...');
+  setTimeout(()=>{ window.location.href = f.href; }, 500);
+}
+
+document.getElementById('fileArea').addEventListener('click', ()=>{
+  document.querySelectorAll('.file-row').forEach(r=>r.classList.remove('selected'));
+  selected = null;
+  document.getElementById('detailsBody').innerHTML = '<div class="dp-empty">Select a file to<br>view its details</div>';
+  document.getElementById('sbSel').style.display = 'none';
+});
+
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+renderFiles();
+</script>
+</body>
+</html>
